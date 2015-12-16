@@ -24,6 +24,7 @@ public class DataHandle {
 	private HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
 //	private int[][] trainData = new int[user_num][item_num];
 //	private int[][] testData = new int[user_num][item_num];
+//	private double[][] simiMatrix = new double[item_num][item_num];
 	private double[][] simiMatrix = new double[item_num][item_num];
 	
 	private HashMap<Integer, ArrayList<Integer> > clusterResult = new HashMap<Integer, ArrayList<Integer>>();
@@ -95,6 +96,7 @@ public class DataHandle {
 		System.out.println("computeSimilary 运行时间：" + (end - start) + "毫秒");
 		System.out.println("Already get the similarity matrix.");
 	}
+	
 	
 	
 	public void writeSimiMatrixIntoFile(String filePath) {
@@ -230,6 +232,7 @@ public class DataHandle {
 		long end = System.currentTimeMillis();
 		System.out.println("clustering 运行时间：" + (end - start) + "毫秒");
 	}
+	
 	
 	
 	/**

@@ -227,6 +227,7 @@ public class MyRecom {
 		}
 		long end = System.currentTimeMillis();
 		System.out.println("clustering 运行时间：" + (end - start) + "毫秒");
+		System.out.println("clusterResult = " + clusterResult);
 	}
 	
 	
@@ -357,21 +358,24 @@ public class MyRecom {
 		int testNum = 20000;
 		Set<Integer> keys = testData.keySet();
 		Iterator<Integer> iterator = keys.iterator();
+		int cnt = 0;
 		while (iterator.hasNext()) {
 			int key = iterator.next();
 			HashMap<Integer, Double> items = testData.get(key);
 			Set<Integer> keys_item = items.keySet();
 			Iterator<Integer> iterator_item = keys_item.iterator();
 			while (iterator_item.hasNext()) {
+				cnt++;
 				int key_item = iterator_item.next();
 				double x = items.get(key_item);
 				double y = ratingMatrix[key-1][key_item-1];
 				rmse += (x-y)*(x-y);
 			}
 		}
-		rmse /= testNum;
+		rmse /= (double)testNum;
 		rmse = Math.sqrt(rmse);
 		System.out.println("RMSE = " + rmse);
+//		System.out.println("cnt = " + cnt);
 	}
  	
 	
@@ -386,10 +390,10 @@ public class MyRecom {
 		testData = getData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrix.txt";
 		
-//		computeSimilary();
-//		writeSimiMatrixIntoFile(filePath);
+		computeSimilary();
+		writeSimiMatrixIntoFile(filePath);
 		
-		readSimiMatrixFile(filePath);
+//		readSimiMatrixFile(filePath);
 		clustering(clusterNum);
 		buildMultiItemVector();
 		
