@@ -13,23 +13,21 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
-
-public class DataHandle {
+public class MyRecom {
+	protected final int user_num = 943;
+	protected final int item_num = 1682;
+	protected final int clusterNum = 200;
+	protected final double averg = 3.52835;
+	protected HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
+	protected HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
+//	protected int[][] trainData = new int[user_num][item_num];
+//	protected int[][] testData = new int[user_num][item_num];
+	protected double[][] simiMatrix = new double[item_num][item_num];
 	
-	private final int user_num = 943;
-	private final int item_num = 1682;
-	private final int clusterNum = 200;
-	private final double averg = 3.52835;
-	private HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
-	private HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
-//	private int[][] trainData = new int[user_num][item_num];
-//	private int[][] testData = new int[user_num][item_num];
-	private double[][] simiMatrix = new double[item_num][item_num];
-	
-	private HashMap<Integer, ArrayList<Integer> > clusterResult = new HashMap<Integer, ArrayList<Integer>>();
-	private double[][] itemVector = new double[item_num][clusterNum];
-	private double[][] userVector = new double[user_num][clusterNum];
-	private double[][] ratingMatrix = new double[user_num][item_num];
+	protected HashMap<Integer, ArrayList<Integer> > clusterResult = new HashMap<Integer, ArrayList<Integer>>();
+	protected double[][] itemVector = new double[item_num][clusterNum];
+	protected double[][] userVector = new double[user_num][clusterNum];
+	protected double[][] ratingMatrix = new double[user_num][item_num];
 	
 	public HashMap<Integer, HashMap<Integer, Double> >  getData(String filePath) {
 		HashMap<Integer, HashMap<Integer, Double> > dataSet = new HashMap<Integer, HashMap<Integer, Double> >();
@@ -406,25 +404,4 @@ public class DataHandle {
 		long end = System.currentTimeMillis();
 		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
 	}
-	
-	
-	
-	public static void main(String[] args) throws Exception {
-		DataHandle dh = new DataHandle();
-		dh.ourMethod();
-
-		
-		
-//		int [][] tt = new int[2][2];
-//		int [] t = new int[2];
-//		t[0] = 2;
-//		t[1] = 3;
-//		tt[0] = t;
-//		System.out.println(tt[0][0] + "   " + tt[0][1]);
-//		System.out.println(tt[1][0] + "   " + tt[1][1]);
-		
-		
-	}
-	
-	
 }
