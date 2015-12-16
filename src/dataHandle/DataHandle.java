@@ -259,7 +259,9 @@ public class DataHandle {
 	}
 	
 	public void buildUserVectorBySum() {
-		
+		for (int i = 0; i < user_num; i++) {
+			
+		}
 	}
 	
 	
@@ -284,10 +286,18 @@ public class DataHandle {
 	
 	
 	public static void main(String[] args) throws Exception {
-		DataHandle dh = new DataHandle();
-		dh.ourMethod();
+//		DataHandle dh = new DataHandle();
+//		dh.ourMethod();
+//		
+//		System.out.println("cluster.size() = " + dh.clusterResult.size());
+		int [][] tt = new int[2][2];
+		int [] t = new int[2];
+		t[0] = 2;
+		t[1] = 3;
+		tt[0] = t;
+		System.out.println(tt[0][0] + "   " + tt[0][1]);
 		
-		System.out.println("cluster.size() = " + dh.clusterResult.size());
+		
 	}
 	
 	
