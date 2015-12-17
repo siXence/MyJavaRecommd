@@ -1,18 +1,20 @@
 /**
- * Based on distance to cluster items
- * Item vector is multi-dimension
- * Using the thought of SVD++ to build rating matrix 
+ * 
  */
-package dataHandle;
+package method;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
-public class SVDplusplus extends ClusterSVDDist {
-	protected double[][] impItemVector = new double[item_num][clusterNum];
+/**
+ * @author xv
+ *
+ */
+public class ClusterSVDppUser extends MethodBasedOnSimilarity{
 	
+	protected double[][] impItemVector = new double[item_num][clusterNum];
 	public double[] getImplictInfo(int uid) {
 		HashMap<Integer, Double> items = trainData.get(uid);
 		double[] imPu = new double[clusterNum];
@@ -125,21 +127,19 @@ public class SVDplusplus extends ClusterSVDDist {
 		buildMultiItemVector();
 		
 		
-//		buildUserVectorBySum();
-//		getRatingMatrix();
-//		getRMSE();
-		
 		getRatingMatrixBySVD(50, 0.01, 0.01);
 		
 		System.out.println("cluster.size() = " + clusterResult.size());
+//		System.out.println("cluster  = " + clusterResult);
 		long end = System.currentTimeMillis();
 		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
 	}
 	
 	public static void main(String[] args) throws Exception {
-		SVDplusplus dh = new SVDplusplus();
+		ClusterSVDppUser dh = new ClusterSVDppUser();
 		dh.ourMethod();
 
 		
 	}
+
 }

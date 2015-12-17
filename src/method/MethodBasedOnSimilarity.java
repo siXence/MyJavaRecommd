@@ -1,4 +1,7 @@
-package dataHandle;
+/**
+ * 
+ */
+package method;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,24 +16,26 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
-
-public class DataHandle {
+/**
+ * @author xv
+ *
+ */
+public class MethodBasedOnSimilarity {
+	protected final int user_num = 943;
+	protected final int item_num = 1682;
+	protected final int clusterNum = 200;
+	protected final double averg = 3.52835;
+	protected HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
+	protected HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
+//	protected int[][] trainData = new int[user_num][item_num];
+//	protected int[][] testData = new int[user_num][item_num];
+//	protected double[][] simiMatrix = new double[item_num][item_num];
+	protected double[][] simiMatrix = new double[item_num][item_num];
 	
-	private final int user_num = 943;
-	private final int item_num = 1682;
-	private final int clusterNum = 200;
-	private final double averg = 3.52835;
-	private HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
-	private HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
-//	private int[][] trainData = new int[user_num][item_num];
-//	private int[][] testData = new int[user_num][item_num];
-//	private double[][] simiMatrix = new double[item_num][item_num];
-	private double[][] simiMatrix = new double[item_num][item_num];
-	
-	private HashMap<Integer, ArrayList<Integer> > clusterResult = new HashMap<Integer, ArrayList<Integer>>();
-	private double[][] itemVector = new double[item_num][clusterNum];
-	private double[][] userVector = new double[user_num][clusterNum];
-	private double[][] ratingMatrix = new double[user_num][item_num];
+	protected HashMap<Integer, ArrayList<Integer> > clusterResult = new HashMap<Integer, ArrayList<Integer>>();
+	protected double[][] itemVector = new double[item_num][clusterNum];
+	protected double[][] userVector = new double[user_num][clusterNum];
+	protected double[][] ratingMatrix = new double[user_num][item_num];
 	
 	public HashMap<Integer, HashMap<Integer, Double> >  getData(String filePath) {
 		HashMap<Integer, HashMap<Integer, Double> > dataSet = new HashMap<Integer, HashMap<Integer, Double> >();
@@ -54,13 +59,13 @@ public class DataHandle {
                     
                 }
                 read.close();
-		    }else{
-		        System.out.println("找不到指定的文件");
-		    }
-	    } catch (Exception e) {
-	        System.out.println("读取文件内容出错");
-	        e.printStackTrace();
+	    }else{
+	        System.out.println("找不到指定的文件");
 	    }
+    } catch (Exception e) {
+        System.out.println("读取文件内容出错");
+        e.printStackTrace();
+    }
 		
 		
 		return dataSet;
@@ -163,7 +168,6 @@ public class DataHandle {
 	
 	
 	public void clustering(int K) {
-		System.out.println("50 = " + simiMatrix[50][50]);
 		long start = System.currentTimeMillis();
 		System.out.println("Start to cluster...");
 		ArrayList<Integer> itemList = new ArrayList<Integer>();
@@ -187,9 +191,8 @@ public class DataHandle {
 					}
 				}
 			}
-//			System.out.println("clusterResult = " + clusterResult);
-//			System.out.println("x= " + x);
-//			System.out.println("y= " + y);
+//			System.out.println("x = " + x);
+//			System.out.println("y = " + y);
 			clusterResult.put(x, new ArrayList<Integer>());
 			clusterResult.put(y, new ArrayList<Integer>());
 //			System.out.println("clusterResult size() 1= " + clusterResult.size());
@@ -200,11 +203,10 @@ public class DataHandle {
 					clusterResult.get(y).add(id);
 				}
 			}
-			
-//			System.out.println("1 " + clusterResult.get(x).size());
-//			System.out.println("1  = " + clusterResult.get(x));
-//			System.out.println("2 " + clusterResult.get(y).size());
-//			System.out.println("2 = " + clusterResult.get(y));
+//			System.out.println("x = " + x);
+//			System.out.println(clusterResult.get(x));
+//			System.out.println("y = " + y);
+//			System.out.println(clusterResult.get(y));
 			int centerWithMostItems = 0;
 			int cnt = 0;
 			Set<Integer> keys = clusterResult.keySet();
@@ -220,13 +222,6 @@ public class DataHandle {
 			itemList.clear();
 			itemList = clusterResult.get(centerWithMostItems);
 			clusterResult.remove(centerWithMostItems);
-//			System.out.println("itemList.size() = " + itemList.size());
-//			System.out.println("itemList = " + itemList);
-//			System.out.println("clusterResult size() 2= " + clusterResult.size());
-			if ( k == 2) {
-				int tt = 0;
-				tt += 1;
-			}
 
 		}
 		long end = System.currentTimeMillis();
@@ -264,25 +259,25 @@ public class DataHandle {
 		System.out.println("buildItemVector 运行时间：" + (end - start) + "毫秒");
 	}
 	
-	public void buildUserVectorBySum() {
-		System.out.println("Start to build userVector...");
-		long start = System.currentTimeMillis();
-		for (int i = 0; i < user_num; i++) {
-			double[] tmp = new double[clusterNum];
-			HashMap<Integer, Double> items = trainData.get(i+1);
-			Set<Integer> keys = items.keySet();
-			Iterator<Integer> iterator = keys.iterator();
-			while (iterator.hasNext()) {
-				int key = iterator.next();
-				for (int j = 0; j < clusterNum; j++) {
-					tmp[j] += itemVector[key-1][j];
-				}
-			}
-			userVector[i] = tmp;
-		}
-		long end = System.currentTimeMillis();
-		System.out.println("buildUserVectorBySum 运行时间：" + (end - start) + "毫秒");
-	}
+//	public void buildUserVectorBySum() {
+//		System.out.println("Start to build userVector...");
+//		long start = System.currentTimeMillis();
+//		for (int i = 0; i < user_num; i++) {
+//			double[] tmp = new double[clusterNum];
+//			HashMap<Integer, Double> items = trainData.get(i+1);
+//			Set<Integer> keys = items.keySet();
+//			Iterator<Integer> iterator = keys.iterator();
+//			while (iterator.hasNext()) {
+//				int key = iterator.next();
+//				for (int j = 0; j < clusterNum; j++) {
+//					tmp[j] += itemVector[key-1][j];
+//				}
+//			}
+//			userVector[i] = tmp;
+//		}
+//		long end = System.currentTimeMillis();
+//		System.out.println("buildUserVectorBySum 运行时间：" + (end - start) + "毫秒");
+//	}
 	
 	
 	public void getRatingMatrix() {
@@ -300,62 +295,62 @@ public class DataHandle {
 	}
 	
 	
-	public void getRatingMatrixBySVD(int iterNum, double learnRate, double lamda) {
-		double[] bi = new double[item_num];
-		double[] bu = new double[user_num];
-		Random rd = new Random();
-//		System.out.println(rd.nextDouble());
-		for (int i = 0; i < user_num; i++) {
-			for (int j = 0; j < clusterNum; j++) {
-				userVector[i][j] = rd.nextDouble();	
-			}
-		}
-//		getRatingMatrix();
-		
-		for (int i = 0; i < iterNum; i++) {
-
-			Set<Integer> keys = trainData.keySet();
-			Iterator<Integer> iterator = keys.iterator();
-			while (iterator.hasNext()) {
-				int uid = iterator.next();
-				HashMap<Integer, Double> items = trainData.get(uid);
-				Set<Integer> keys_item = items.keySet();
-				Iterator<Integer> iterator_item = keys_item.iterator();
-				while (iterator_item.hasNext()) {
-					int iid = iterator_item.next();
-					double x = items.get(iid);
-					double prod = 0.0;
-					for (int k = 0; k < clusterNum; k++) {
-						prod += userVector[uid-1][k]*itemVector[iid-1][k];
-					}
-					double y = prod + averg  + bu[uid-1] + bi[iid-1];
-					double eui = x - y;
-//					System.out.println("eui = " + eui);
-					
-					bu[uid-1] += learnRate*(eui - lamda*bu[uid-1]);
-					bi[iid-1] += learnRate*(eui - lamda*bi[iid-1]);
-					for (int j = 0; j < clusterNum; j++) {
-						userVector[uid-1][j] += learnRate*(eui*itemVector[iid-1][j] - lamda*userVector[uid-1][j]);
-					}
-					
-				}
-			}
-			learnRate *= 0.9;
-			System.out.println("The test_RMSE in " + (i+1) + "time :---------------------------------------------------------------------");
-			for (int ii = 0; ii < user_num; ii++) {
-				for (int jj = 0; jj < item_num; jj++) {
-//					ratingMatrix[ii][jj] = 0.0;
-					double p = 0.0;
-					for (int k = 0; k < clusterNum; k++) {
-						p += (userVector[ii][k]*itemVector[jj][k]);
-					}
-					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
-				}
-			}
-//			getRatingMatrix();
-			getRMSE();
-		}
-	}
+//	public void getRatingMatrixBySVD(int iterNum, double learnRate, double lamda) {
+//		double[] bi = new double[item_num];
+//		double[] bu = new double[user_num];
+//		Random rd = new Random();
+////		System.out.println(rd.nextDouble());
+//		for (int i = 0; i < user_num; i++) {
+//			for (int j = 0; j < clusterNum; j++) {
+//				userVector[i][j] = rd.nextDouble();	
+//			}
+//		}
+////		getRatingMatrix();
+//		
+//		for (int i = 0; i < iterNum; i++) {
+//
+//			Set<Integer> keys = trainData.keySet();
+//			Iterator<Integer> iterator = keys.iterator();
+//			while (iterator.hasNext()) {
+//				int uid = iterator.next();
+//				HashMap<Integer, Double> items = trainData.get(uid);
+//				Set<Integer> keys_item = items.keySet();
+//				Iterator<Integer> iterator_item = keys_item.iterator();
+//				while (iterator_item.hasNext()) {
+//					int iid = iterator_item.next();
+//					double x = items.get(iid);
+//					double prod = 0.0;
+//					for (int k = 0; k < clusterNum; k++) {
+//						prod += userVector[uid-1][k]*itemVector[iid-1][k];
+//					}
+//					double y = prod + averg  + bu[uid-1] + bi[iid-1];
+//					double eui = x - y;
+////					System.out.println("eui = " + eui);
+//					
+//					bu[uid-1] += learnRate*(eui - lamda*bu[uid-1]);
+//					bi[iid-1] += learnRate*(eui - lamda*bi[iid-1]);
+//					for (int j = 0; j < clusterNum; j++) {
+//						userVector[uid-1][j] += learnRate*(eui*itemVector[iid-1][j] - lamda*userVector[uid-1][j]);
+//					}
+//					
+//				}
+//			}
+//			learnRate *= 0.9;
+//			System.out.println("The test_RMSE in " + (i+1) + "time :---------------------------------------------------------------------");
+//			for (int ii = 0; ii < user_num; ii++) {
+//				for (int jj = 0; jj < item_num; jj++) {
+////					ratingMatrix[ii][jj] = 0.0;
+//					double p = 0.0;
+//					for (int k = 0; k < clusterNum; k++) {
+//						p += (userVector[ii][k]*itemVector[jj][k]);
+//					}
+//					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
+//				}
+//			}
+////			getRatingMatrix();
+//			getRMSE();
+//		}
+//	}
 	
 	
 	public void getRMSE() {
@@ -380,56 +375,4 @@ public class DataHandle {
 		rmse = Math.sqrt(rmse);
 		System.out.println("RMSE = " + rmse);
 	}
- 	
-	
-	
-	
-	public void ourMethod() {
-		System.out.println("Starting...");
-		long start = System.currentTimeMillis();
-		String filePath = "/home/xv/DataForRecom/ml-100k/u1.base";
-		trainData = getData(filePath);
-		filePath = "/home/xv/DataForRecom/ml-100k/u1.test";
-		testData = getData(filePath);
-		filePath = "/home/xv/DataForRecom/saveData/simiMatrix.txt";
-		
-//		computeSimilary();
-//		writeSimiMatrixIntoFile(filePath);
-		
-		readSimiMatrixFile(filePath);
-		clustering(clusterNum);
-		buildMultiItemVector();
-		
-		
-//		buildUserVectorBySum();
-//		getRatingMatrix();
-//		getRMSE();
-		
-		getRatingMatrixBySVD(50, 0.01, 0.01);
-		
-		System.out.println("cluster.size() = " + clusterResult.size());
-		long end = System.currentTimeMillis();
-		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
-	}
-	
-	
-	
-	public static void main(String[] args) throws Exception {
-		DataHandle dh = new DataHandle();
-		dh.ourMethod();
-
-		
-		
-//		int [][] tt = new int[2][2];
-//		int [] t = new int[2];
-//		t[0] = 2;
-//		t[1] = 3;
-//		tt[0] = t;
-//		System.out.println(tt[0][0] + "   " + tt[0][1]);
-//		System.out.println(tt[1][0] + "   " + tt[1][1]);
-		
-		
-	}
-	
-	
 }

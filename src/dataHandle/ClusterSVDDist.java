@@ -74,8 +74,8 @@ public class ClusterSVDDist extends MyRecom{
 			}
 			clusterResult.put(x, new ArrayList<Integer>());
 			clusterResult.put(y, new ArrayList<Integer>());
-			System.out.println("x = " + x);
-			System.out.println("y = " + y);
+//			System.out.println("x = " + x);
+//			System.out.println("y = " + y);
 //			System.out.println("clusterResult size() 1= " + clusterResult.size());
 			for (Integer id:itemList) {
 				if (getSim(x, id) <=  getSim(y, id)) {
@@ -118,18 +118,42 @@ public class ClusterSVDDist extends MyRecom{
 	public void buildMultiItemVector() {
 		System.out.println("Start to build itemVector...");
 		long start = System.currentTimeMillis();		
+		
+		
 		int[] centers = new int[clusterNum];
+		
 		Set<Integer> keys = clusterResult.keySet();
 		Iterator<Integer> iterator = keys.iterator();
 		int idx = 0;
 		while (iterator.hasNext()) {
 			int key = iterator.next();
-			System.out.println("center  " + idx + " :" + key);
 			centers[idx++] = key;
 		}
 		
+//		try {
+//            String encoding="GBK";
+//            String filePath = "/home/xv/DataForRecom/saveData/centers.txt";
+//            File file=new File(filePath);
+//            if(file.isFile() && file.exists()){ //判断文件是否存在
+//                InputStreamReader read = new InputStreamReader(
+//                new FileInputStream(file),encoding);//考虑到编码格式
+//                BufferedReader bufferedReader = new BufferedReader(read);
+//                String lineTxt = null;
+//                int idx = 0;
+//                while((lineTxt = bufferedReader.readLine()) != null){
+////                    String[] tmp = lineTxt.split("\t");
+////                    System.out.println("lineTxt = " + lineTxt);
+//                    centers[idx++] = Integer.parseInt(lineTxt);
+//                }
+//                read.close();
+//		    }else{
+//		        System.out.println("找不到指定的文件");
+//		    }
+//	    } catch (Exception e) {
+//	        System.out.println("读取文件内容出错");
+//	        e.printStackTrace();
+//	    }
 		
-		System.out.println("centers = " + centers);
 		for (int i = 0; i < item_num; i++) {
 			double sum = 0.0;
 			for (int j = 0; j < clusterNum; j++) {
@@ -148,12 +172,14 @@ public class ClusterSVDDist extends MyRecom{
 //				sum += tmp;
 //				itemVector[i][j] = tmp;
 				
-				if (i == centers[j] || tmp == 0.0) {
+				if (i == centers[j]) {
+					tmp = 0.0000001;
+				}
+				
+				if (tmp == 0.0) {
 //					itemVector[i][j] = 0.00000001;
-					tmp = 0.00000001;
+					tmp = 0.0000001;
 					itemVector[i][j] = tmp;
-					sum += tmp;
-					continue;
 				} 
 				tmp =(double) 1/tmp;
 				sum += tmp;
@@ -229,9 +255,11 @@ public class ClusterSVDDist extends MyRecom{
 			for (int ii = 0; ii < user_num; ii++) {
 				for (int jj = 0; jj < item_num; jj++) {
 //					ratingMatrix[ii][jj] = 0.0;
+					double p = 0.0;
 					for (int k = 0; k < clusterNum; k++) {
-						ratingMatrix[ii][jj] = (userVector[ii][k]*itemVector[jj][k] + averg + bu[ii] + bi[jj]);
+						p += (userVector[ii][k]*itemVector[jj][k]);
 					}
+					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
 				}
 			}
 //			getRatingMatrix();
