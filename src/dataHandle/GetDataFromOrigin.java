@@ -1,5 +1,7 @@
 /**
  * 将源数据转为MovieLens格式的数据
+ * 剔除观看节目少于30个的用户
+ * 剔除被观看人数少于10个的节目
  */
 package dataHandle;
 
@@ -19,10 +21,12 @@ import java.util.HashMap;
  *
  */
 public class GetDataFromOrigin {
+	protected final int numLimit = 10;
 	ArrayList<String> data = new ArrayList<String>();
 	HashMap<String, String> proLength = new HashMap<String, String>();
+	HashMap<String, Integer> itemCnt = new HashMap<String, Integer>();
 	private final int itemLimit = 30;
-	private final int fileNum = 2500;
+	private final int fileNum = 3000;
 	private final int fileStep = 5;
 	
 	public void readOriginFile(String filePath) {
@@ -131,7 +135,14 @@ public class GetDataFromOrigin {
 		System.out.println("data.size() = " + data.size());
 		Collections.sort(data);
 		write();
+		
+
+		
 		cleanData();
+		
+		//remove little items
+		removeItemLittleWatched();
+		
 		writeFormatData();
 	}
 	
@@ -262,6 +273,58 @@ public class GetDataFromOrigin {
 	        System.out.println("读取文件内容出错");
 	        e.printStackTrace();
 	    }
+		
+	}
+	
+	public void removeItemLittleWatched() {
+		int i = 0;
+		while (i < data.size()) {
+			String[] tmp = data.get(i).split("\t");
+			if (itemCnt.containsKey(tmp[1])) {
+				int cnt = itemCnt.get(tmp[1]);
+				cnt++;
+				itemCnt.put(tmp[1], cnt);
+			} else {
+				itemCnt.put(tmp[1], 1);
+			}
+			i++;
+		}
+		i = 0;
+		while (i < data.size()) {
+			String[] tmp = data.get(i).split("\t");
+			if (itemCnt.get(tmp[1]) < numLimit) {
+				data.remove(i);
+			} else {
+				i++;
+			}
+		}
+		
+		
+		i = 1;
+        int start =0;
+        int cnt = 1;
+        String[] tmp =data.get(0).split("\t");
+        String lastUser = tmp[0];
+        while (i < data.size()) {
+        	tmp =data.get(i).split("\t");
+        	if (lastUser.compareTo(tmp[0]) == 0) {
+        		cnt++;
+        	} else {
+        		if (cnt < itemLimit) {
+        			i = start-1;
+        			while(cnt> 0) {
+        				data.remove(start);
+        				cnt--;
+        			}
+        		} else {
+        			start = i;
+        		}
+        		cnt = 1;
+        		lastUser = tmp[0];
+        	}
+        	i++;
+        }
+		
 		
 	}
 	

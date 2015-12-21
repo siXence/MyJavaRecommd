@@ -20,17 +20,18 @@ import java.util.Set;
  *
  */
 public class MethodBasedOnSimilarityTW {
-	protected final int user_num = 2752;
-	protected final int item_num = 13379;
+	protected final int user_num = 2318;
+	protected final int item_num = 4358;
 	protected final int clusterNum = 300;
-	protected final double averg = 0.7487;
+	protected final double averg = 4.2907;
 //	protected final int user_num = 943;
 //	protected final int item_num = 1682;
 //	protected final int clusterNum = 100;
 //	protected final double averg = 3;
 	protected HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
 	protected HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
-//	protected int[][] trainData = new int[user_num][item_num];
+	protected HashMap<Integer, Integer> itemCnt = new HashMap<Integer, Integer>();
+	//	protected int[][] trainData = new int[user_num][item_num];
 //	protected int[][] testData = new int[user_num][item_num];
 //	protected double[][] simiMatrix = new double[item_num][item_num];
 	protected double[][] simiMatrix = new double[item_num][item_num];
@@ -69,9 +70,9 @@ public class MethodBasedOnSimilarityTW {
         System.out.println("读取文件内容出错");
         e.printStackTrace();
     }
-		
-		
 		return dataSet;
+		
+			
 	}
 	
 	public void computeSimilary() {
@@ -127,6 +128,77 @@ public class MethodBasedOnSimilarityTW {
 		    writer.close();
 		} catch (Exception e) {
 		    e.printStackTrace();
+	    }
+	}
+	
+	public void getTrainData(String filePath) {
+		try {
+            String encoding="GBK";
+            File file=new File(filePath);
+            if(file.isFile() && file.exists()){ //判断文件是否存在
+                InputStreamReader read = new InputStreamReader(
+                new FileInputStream(file),encoding);//考虑到编码格式
+                BufferedReader bufferedReader = new BufferedReader(read);
+                String lineTxt = null;
+                int lastUid = 0;
+                while((lineTxt = bufferedReader.readLine()) != null){
+                    String[] tmp = lineTxt.split("\t");
+                    int uid = Integer.parseInt(tmp[0]);
+                    int iid = Integer.parseInt(tmp[1]);
+                    if (lastUid != uid && lastUid + 1 != uid) {
+                    	System.out.println("short " + uid);
+                    }
+                    lastUid = uid;
+                    double rating = Double.valueOf(tmp[2]);
+                    if (!trainData.containsKey(uid)) {
+                    	trainData.put(uid, new HashMap<Integer, Double>());
+                    } 
+                    trainData.get(uid).put(iid, rating);
+                    if (!itemCnt.containsKey(iid)) {
+                    	itemCnt.put(iid, 0);
+                    }
+                    int cnt = itemCnt.get(iid);
+                    cnt++;
+                    itemCnt.put(iid, cnt);
+                }
+                read.close();
+		    }else{
+		        System.out.println("找不到指定的文件");
+		    }
+	    } catch (Exception e) {
+	        System.out.println("读取文件内容出错");
+	        e.printStackTrace();
+	    }
+		
+	}
+	
+	public void getTestData(String filePath) {
+		try {
+            String encoding="GBK";
+            File file=new File(filePath);
+            if(file.isFile() && file.exists()){ //判断文件是否存在
+                InputStreamReader read = new InputStreamReader(
+                new FileInputStream(file),encoding);//考虑到编码格式
+                BufferedReader bufferedReader = new BufferedReader(read);
+                String lineTxt = null;
+                while((lineTxt = bufferedReader.readLine()) != null){
+                    String[] tmp = lineTxt.split("\t");
+                    int uid = Integer.parseInt(tmp[0]);
+                    int iid = Integer.parseInt(tmp[1]);
+                    double rating = Double.valueOf(tmp[2]);
+                    if (!testData.containsKey(uid)) {
+                    	testData.put(uid, new HashMap<Integer, Double>());
+                    } 
+                    testData.get(uid).put(iid, rating);
+                    
+                }
+                read.close();
+		    }else{
+		        System.out.println("找不到指定的文件");
+		    }
+	    } catch (Exception e) {
+	        System.out.println("读取文件内容出错");
+	        e.printStackTrace();
 	    }
 	}
 	
@@ -261,6 +333,9 @@ public class MethodBasedOnSimilarityTW {
 			}
 			for (int j = 0; j < clusterNum; j++) {
 				itemVector[i][j] /= sum;
+				if (itemVector[i][j] < 0.01) {
+					itemVector[i][j] = 0.0;
+				}
 			}
 		}
 		long end = System.currentTimeMillis();

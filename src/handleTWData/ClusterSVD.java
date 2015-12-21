@@ -74,7 +74,15 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 				if (Double.isNaN(similarity.itemSimilarity(i+1, j+1))) {
 					System.out.println("There is a NaN.");
 				}
-				this.simiMatrix[i][j] = similarity.itemSimilarity(i+1, j+1);
+				int c1 = 1;
+				if (itemCnt.containsKey(i+1)) {
+					c1 = itemCnt.get(i+1);
+				}
+				int c2 = 1;
+				if (itemCnt.containsKey(j+1)) {
+					c2 = itemCnt.get(j+1);
+				}
+				this.simiMatrix[i][j] = similarity.itemSimilarity(i+1, j+1)/(c1*c2);
 			}
 		}
 		long end = System.currentTimeMillis();
@@ -152,33 +160,42 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 	
 	
 	
+	
+	
+	
 	public void ourMethod() throws IOException, TasteException {
 		System.out.println("Starting...");
 		long start = System.currentTimeMillis();
 		String filePath = "/home/xv/DataForRecom/saveData/ua.base";
 		
-		trainData = getData(filePath);
+//		trainData = getData(filePath);
+		getTrainData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/ua.test";
-		testData = getData(filePath);
+//		testData = getData(filePath);
+		getTestData(filePath);
 //		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
-//		computeCityBlockSimilarity(trainFile);
+		computeCityBlockSimilarity(trainFile);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixCity.txt";
 //		writeSimiMatrixIntoFile(filePath);
 //		
 //		computeSimilary();
 //		writeSimiMatrixIntoFile(filePath);
 		
-		readSimiMatrixFile(filePath);
+//		readSimiMatrixFile(filePath);
 		
 		clustering(clusterNum);
 		buildMultiItemVector();		
-		getRatingMatrixBySVD(50, 0.03, 0.01);
+		getRatingMatrixBySVD(100, 0.5, 0.01);
 		
 		System.out.println("cluster.size() = " + clusterResult.size());
 		long end = System.currentTimeMillis();
 		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
+	}
+	
+	public void getPreAndRecall() {
+		
 	}
 	
 	public static void main(String[] args) throws Exception {
