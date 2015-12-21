@@ -463,9 +463,9 @@ public class ComputeRMSE {
 	 */
     public static void addAllItemsToTestSet() {
 //		//Add 0 to user-item matrix
-		String file = "ua.test";
+		String file = "/home/xv/DataForRecom/tw-data/ua.test";
 		addNoItems(file);
-		String fileout = "u1all.test";
+		String fileout = "/home/xv/DataForRecom/tw-data/u1all.test";
 		writeAllUpmat(fileout);
 		System.out.println("Done");
     }
@@ -493,18 +493,18 @@ public class ComputeRMSE {
 	
 	
 	public static void main(String[] args) throws Exception {
-//		String filePret = "result/pred.txt";
-//		String fileTest = "u1.test";
-//		getPreScore(filePret);
-//		getTestScore(fileTest);
-//		
-//		double rmse = 0.0;
-//		for (int i = 0; i < preScore.size(); i++) {
-//			rmse += (preScore.get(i)- testScore.get(i))*(preScore.get(i)- testScore.get(i));
-//		}
-//		rmse /= preScore.size();
-//		rmse = Math.sqrt(rmse);
-//		System.out.println("RMSE = " + rmse);
+		String filePret = "/home/xv/DataForRecom/tw-data/pred.txt";
+		String fileTest = "/home/xv/DataForRecom/saveData/ua.test";
+		getPreScore(filePret);
+		getTestScore(fileTest);
+		
+		double rmse = 0.0;
+		for (int i = 0; i < preScore.size(); i++) {
+			rmse += (preScore.get(i)- testScore.get(i))*(preScore.get(i)- testScore.get(i));
+		}
+		rmse /= preScore.size();
+		rmse = Math.sqrt(rmse);
+		System.out.println("RMSE = " + rmse);
 		
 		
 //		//remove timeStamp
@@ -541,9 +541,9 @@ public class ComputeRMSE {
 		
 		
 //		//RMSE for all prediction
-//		String filePret = "result/pred.txt";
+//		String filePret = "/home/xv/DataForRecom/tw-data/pred.txt";
 //		getAllPred(filePret);
-//		String fileTest = "u1.test";
+//		String fileTest = "/home/xv/DataForRecom/tw-data/u1.test";
 //		double rmse = getRMSEfromAllPredition(fileTest);
 //		System.out.println("RMSE = " + rmse);
 		
@@ -553,7 +553,7 @@ public class ComputeRMSE {
 //		addAllItemsToTestSet();
 		
 		
-		getPrecisionAndRecall();
+//		getPrecisionAndRecall();
       
       System.out.println("Done");
 	}

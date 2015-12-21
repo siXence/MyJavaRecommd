@@ -581,13 +581,13 @@ public class Demo2 {
 ////        demo.slope_one(model);
         
         
-//        demo.SVD(model);
-        getRecomFromFile("prediction.txt");
-        getPrecisionAndRecallForSVD(2);
-        
-        write("precisionSVDML.xls", precisionSVD);
-        write("recallSVDML.xls", recallSVD);
-      write("F1SVDML.xls", svdF1);
+////        demo.SVD(model);
+//        getRecomFromFile("prediction.txt");
+//        getPrecisionAndRecallForSVD(2);
+//        
+//        write("precisionSVDML.xls", precisionSVD);
+//        write("recallSVDML.xls", recallSVD);
+//      write("F1SVDML.xls", svdF1);
 //        
 ////        write("precisionSVDTW.txt", precisionSVD);
 ////        write("recallSVDTW.txt", recallSVD);

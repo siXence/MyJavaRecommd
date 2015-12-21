@@ -1,18 +1,19 @@
 /**
  * 
  */
-package method;
+package handleTWData;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
+
 /**
  * @author xv
  *
  */
-public class SVD extends MethodBasedOnSimilarity {
+public class SVD extends MethodBasedOnSimilarityTW{
 	public void getRatingMatrixBySVD(int iterNum, double learnRate, double lamda) {
 		double[] bi = new double[item_num];
 		double[] bu = new double[user_num];
@@ -70,11 +71,11 @@ public class SVD extends MethodBasedOnSimilarity {
 	public void ourMethod() {
 		System.out.println("Starting...");
 		long start = System.currentTimeMillis();
-		String filePath = "/home/xv/DataForRecom/ml-100k/u1.base";
+		String filePath = "/home/xv/DataForRecom/saveData/ua.base";
 		trainData = getData(filePath);
-		filePath = "/home/xv/DataForRecom/ml-100k/u1.test";
+		filePath = "/home/xv/DataForRecom/saveData/ua.test";
 		testData = getData(filePath);
-		filePath = "/home/xv/DataForRecom/saveData/simiMatrix.txt";
+		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
 		getRatingMatrixBySVD(50, 0.01, 0.01);
 		

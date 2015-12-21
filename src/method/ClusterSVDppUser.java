@@ -127,7 +127,7 @@ public class ClusterSVDppUser extends MethodBasedOnSimilarity{
 		buildMultiItemVector();
 		
 		
-		getRatingMatrixBySVD(50, 0.01, 0.01);
+		getRatingMatrixBySVD(50, 0.03, 0.03);
 		
 		System.out.println("cluster.size() = " + clusterResult.size());
 //		System.out.println("cluster  = " + clusterResult);
