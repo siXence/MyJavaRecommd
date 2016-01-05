@@ -143,11 +143,64 @@ public class GetDataFromOrigin {
 		//remove little items
 		removeItemLittleWatched();
 		
+//		reOrderUser() ;
 		writeFormatData();
 	}
 	
-	public void writeFormatData() {
+	
+	public void reOrderUser() {
 		String filePath  = "/home/xv/DataForRecom/saveData/allData.txt";
+//		ArrayList<String> ttt = data;
+//		ttt.clear();
+//		System.out.println("after clear data = " + data);
+		try {
+		    File f = new File(filePath);
+		    if (!f.exists()) {
+		    	f.createNewFile();
+		    }
+		    HashMap<String, Integer> proCache = new HashMap<String, Integer>();
+		    OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(f),"UTF-8");
+		    BufferedWriter writer = new BufferedWriter(write);
+		    String lastUser = "";
+		    String lastItem = "";
+		    int userID = 0;
+		    int itemID = 0;
+		    for (String elem:data) {
+		    	String[] tmp = elem.split("\t");
+		    	if (lastUser.compareTo(tmp[0]) != 0) {
+		    		userID++;
+		    		lastUser = tmp[0];
+		    	}
+		    	
+		    	//re number item
+//		    	if (proCache.containsKey(tmp[1]) ==  false) {
+//		    		itemID++;
+//		    		proCache.put(tmp[1], itemID);
+//		    	}
+//		    	if (lastItem.compareTo(tmp[1]) != 0) {
+//		    		itemID++;
+//		    		lastItem = tmp[1];
+//		    	}
+		    	String d = String.valueOf(userID) + "\t" + tmp[1]+ "\t" + tmp[2];
+		    	writer.write(d+"\n");
+		    }
+		    System.out.println("userID = " + userID);
+		    System.out.println("itemID = " + itemID);
+		    writer.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
+	
+	
+	
+	public void writeFormatData() {
+		//re number user and item 
+		String filePath  = "/home/xv/DataForRecom/saveData/allData.txt";
+		
+//		String filePath = "/home/xv/DataForRecom/saveData/sampleOne.txt";
+//		String filePath = "/home/xv/DataForRecom/saveData/sampleOneOut.txt";
+		
 //		ArrayList<String> ttt = data;
 //		ttt.clear();
 //		System.out.println("after clear data = " + data);
@@ -173,6 +226,80 @@ public class GetDataFromOrigin {
 		    		itemID++;
 		    		proCache.put(tmp[1], itemID);
 		    	}
+		    	//re number item
+//		    	if (lastItem.compareTo(tmp[1]) != 0) {
+//		    		itemID++;
+//		    		lastItem = tmp[1];
+//		    	}
+		    	String d = String.valueOf(userID) + "\t" + String.valueOf(proCache.get(tmp[1])) + "\t" + tmp[2];
+		    	writer.write(d+"\n");
+		    }
+		    System.out.println("userID = " + userID);
+		    System.out.println("itemID = " + itemID);
+		    writer.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
+	
+	public void writeFormatDataForSampleOne() {
+		//re number user and item 
+//		String filePath  = "/home/xv/DataForRecom/saveData/allData.txt";
+		
+		String filePath = "/home/xv/DataForRecom/saveData/sampleOne.txt";
+		String filePathOut = "/home/xv/DataForRecom/saveData/sampleOneOut.txt";
+		
+		
+		try {
+            String encoding="GBK";
+            File file=new File(filePath);
+            if(file.isFile() && file.exists()){ //判断文件是否存在
+                InputStreamReader read = new InputStreamReader(
+                new FileInputStream(file),encoding);//考虑到编码格式
+                BufferedReader bufferedReader = new BufferedReader(read);
+                String lineTxt = null;
+                while((lineTxt = bufferedReader.readLine()) != null){
+//                    String[] tmp = lineTxt.split("\t");
+                	data.add(lineTxt);
+                }
+//                System.out.println("watchlists = " + watchLists.get(1)  + ",  aaa = " + watchLists.get(462));
+                read.close();
+	    }else{
+	        System.out.println("找不到指定的文件");
+	    }
+	    } catch (Exception e) {
+	        System.out.println("读取文件内容出错");
+	        e.printStackTrace();
+	    }
+		
+		Collections.sort(data);
+		
+//		ArrayList<String> ttt = data;
+//		ttt.clear();
+//		System.out.println("after clear data = " + data);
+		try {
+		    File f = new File(filePathOut);
+		    if (!f.exists()) {
+		    	f.createNewFile();
+		    }
+		    HashMap<String, Integer> proCache = new HashMap<String, Integer>();
+		    OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(f),"UTF-8");
+		    BufferedWriter writer = new BufferedWriter(write);
+		    String lastUser = "";
+		    String lastItem = "";
+		    int userID = 0;
+		    int itemID = 0;
+		    for (String elem:data) {
+		    	String[] tmp = elem.split("\t");
+		    	if (lastUser.compareTo(tmp[0]) != 0) {
+		    		userID++;
+		    		lastUser = tmp[0];
+		    	}
+		    	if (proCache.containsKey(tmp[1]) ==  false) {
+		    		itemID++;
+		    		proCache.put(tmp[1], itemID);
+		    	}
+		    	//re number item
 //		    	if (lastItem.compareTo(tmp[1]) != 0) {
 //		    		itemID++;
 //		    		lastItem = tmp[1];
@@ -336,6 +463,8 @@ public class GetDataFromOrigin {
 		String path = "/home/xv/DataForRecom/originData/";
 		tmp.getAllFileNames(path);
 		
+		
+//		tmp.writeFormatDataForSampleOne();
 
 		
 		System.out.println("Done");

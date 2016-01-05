@@ -5,8 +5,11 @@ package handleTWData;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -23,7 +26,7 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
  * @author xv
  *
  */
-public class ClusterSVD extends MethodBasedOnSimilarityTW{
+public class ClusterSVD extends MethodBasedOnDistanceTW{
 	
 	public void computePearsonCorrelationSimilarity(String trainFile) throws IOException, TasteException {
 		System.out.println("Starting PearsonCorrelationSimilarity...");
@@ -159,6 +162,52 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 	}
 	
 	
+	public void getRatingMatrixBySVDAllItems(int iterNum, double learnRate, double lamda) {
+		double[] bi = new double[item_num];
+		double[] bu = new double[user_num];
+		Random rd = new Random();
+		for (int i = 0; i < user_num; i++) {
+			for (int j = 0; j < clusterNum; j++) {
+				userVector[i][j] = rd.nextDouble();	
+			}
+		}
+		
+		for (int i = 0; i < iterNum; i++) {
+			for (int uid = 1; uid <= user_num; uid++) {
+				
+				for (int iid = 1; iid <= item_num; iid++) {
+					double x = upmat[uid-1][iid-1];
+					double prod = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						prod += userVector[uid-1][k]*itemVector[iid-1][k];
+					}
+					double y = prod + averg  + bu[uid-1] + bi[iid-1];
+					double eui = x - y;
+					bu[uid-1] += learnRate*(eui - lamda*bu[uid-1]);
+					bi[iid-1] += learnRate*(eui - lamda*bi[iid-1]);
+					for (int j = 0; j < clusterNum; j++) {
+						userVector[uid-1][j] += learnRate*(eui*itemVector[iid-1][j] - lamda*userVector[uid-1][j]);
+					}
+				}
+			}
+			
+			learnRate *= 0.9;
+			System.out.println("The test_RMSE in " + (i+1) + "time :---------------------------------------------------------------------");
+			for (int ii = 0; ii < user_num; ii++) {
+				for (int jj = 0; jj < item_num; jj++) {
+					double p = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						p += (userVector[ii][k]*itemVector[jj][k]);
+					}
+					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
+				}
+			}
+			getRMSE();
+			
+		}
+	}
+	
+	
 	
 	
 	
@@ -168,26 +217,34 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 		long start = System.currentTimeMillis();
 		String filePath = "/home/xv/DataForRecom/saveData/ua.base";
 		
+		initRatingMatrix();
+		
 //		trainData = getData(filePath);
 		getTrainData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/ua.test";
 //		testData = getData(filePath);
 		getTestData(filePath);
-//		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
+		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
-		computeCityBlockSimilarity(trainFile);
-		filePath = "/home/xv/DataForRecom/saveData/simiMatrixCity.txt";
+//		computeCityBlockSimilarity(trainFile);
+		
+//		filePath = "/home/xv/DataForRecom/saveData/simiMatrixByHand.txt";
 //		writeSimiMatrixIntoFile(filePath);
 //		
 //		computeSimilary();
+		computeSimilaryAllItems() ;
 //		writeSimiMatrixIntoFile(filePath);
 		
 //		readSimiMatrixFile(filePath);
 		
 		clustering(clusterNum);
 		buildMultiItemVector();		
-		getRatingMatrixBySVD(100, 0.5, 0.01);
+//		getRatingMatrixBySVD(50, 0.5, 0.01);
+		getRatingMatrixBySVDAllItems(50, 0.5, 0.01);
+		
+		sortItemsForUser();
+		getPreAndRecallAndF();
 		
 		System.out.println("cluster.size() = " + clusterResult.size());
 		long end = System.currentTimeMillis();
@@ -201,7 +258,23 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 	public static void main(String[] args) throws Exception {
 		ClusterSVD dh = new ClusterSVD();
 		dh.ourMethod();
-
+		
+		
+//		List<String> tmp = new ArrayList<String>();
+//		String a = "4.12340" + "\t" + "10";
+//		tmp.add(a);
+//		a = "0.1234" + "\t" + "3";
+//		tmp.add(a);
+//		a = "3.844" + "\t" + "7";
+//		tmp.add(a);
+//		Collections.sort(tmp);
+//		Collections.reverse(tmp);
+//		for (int i = 0; i < tmp.size(); i++) {
+//			System.out.println(tmp.get(i));
+//			String[] st = tmp.get(i).split("\t");
+//			System.out.println(st[1]);
+//		}
+		
 		
 		
 //		int [][] tt = new int[2][2];

@@ -18,8 +18,8 @@ public class ComputeRMSE {
 // private static final int testNum = 20000;
 	
 	//topway dataset
-	private static final int user_num = 4000;
-	private static final int item_num = 3000;
+	private static final int user_num = 2318;
+	private static final int item_num = 4358;
 	private static final int testNum = 151614;
 	
 	private static List<Double> testScore = new ArrayList<Double>();
@@ -493,18 +493,18 @@ public class ComputeRMSE {
 	
 	
 	public static void main(String[] args) throws Exception {
-		String filePret = "/home/xv/DataForRecom/tw-data/pred.txt";
-		String fileTest = "/home/xv/DataForRecom/saveData/ua.test";
-		getPreScore(filePret);
-		getTestScore(fileTest);
-		
-		double rmse = 0.0;
-		for (int i = 0; i < preScore.size(); i++) {
-			rmse += (preScore.get(i)- testScore.get(i))*(preScore.get(i)- testScore.get(i));
-		}
-		rmse /= preScore.size();
-		rmse = Math.sqrt(rmse);
-		System.out.println("RMSE = " + rmse);
+//		String filePret = "/home/xv/DataForRecom/tw-data/pred.txt";
+//		String fileTest = "/home/xv/DataForRecom/saveData/ua.test";
+//		getPreScore(filePret);
+//		getTestScore(fileTest);
+//		
+//		double rmse = 0.0;
+//		for (int i = 0; i < preScore.size(); i++) {
+//			rmse += (preScore.get(i)- testScore.get(i))*(preScore.get(i)- testScore.get(i));
+//		}
+//		rmse /= preScore.size();
+//		rmse = Math.sqrt(rmse);
+//		System.out.println("RMSE = " + rmse);
 		
 		
 //		//remove timeStamp
@@ -519,24 +519,24 @@ public class ComputeRMSE {
 		
 			
 //		//Add 0 to user-item matrix
-//		String file = "u1.test";
+//		String file ="/home/xv/DataForRecom/saveData/ua.test";
 //		addNoItems(file);
-//		String fileout = "u1all.test";
+//		String fileout = "/home/xv/DataForRecom/saveData/uall.test";
 //		writeAllUpmat(fileout);
 //		System.out.println("Done");
 		
 
-//		//Compute precision and recall from pred.txt
-//		String filePret = "result/pred.txt";
-//		String fileTrain = "u1.base";
-//		String fileTest = "u1.test";
-//		getTrainList(fileTrain);
-//		getTestList(fileTest);
-//		getRecommOrder(filePret);
-//		getPrecisionAndRecallForSVD();
-//        write("precisionSVDFeature.xls", precisionSVD);
-//        write("recallSVDFeature.xls", recallSVD);
-//      write("F1SVDFeature .xls", svdF1);
+		//Compute precision and recall from pred.txt
+		String filePret = "/home/xv/DataForRecom/tw-data/pred.txt";
+		String fileTrain = "/home/xv/DataForRecom/saveData/ua.base";
+		String fileTest = "/home/xv/DataForRecom/saveData/ua.test";
+		getTrainList(fileTrain);
+		getTestList(fileTest);
+		getRecommOrder(filePret);
+		getPrecisionAndRecallForSVD();
+        write("/home/xv/DataForRecom/saveData/precisionSVDpp.xls", precisionSVD);
+        write("/home/xv/DataForRecom/saveData/recallSVDpp.xls", recallSVD);
+      write("/home/xv/DataForRecom/saveData/f1SVDpp.xls", svdF1);
 		
 		
 		
