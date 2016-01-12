@@ -26,7 +26,7 @@ import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
  * @author xv
  *
  */
-public class ClusterSVD extends MethodBasedOnDistanceTW{
+public class ClusterSVD extends MethodBasedOnSimilarityTW{
 	
 	public void computePearsonCorrelationSimilarity(String trainFile) throws IOException, TasteException {
 		System.out.println("Starting PearsonCorrelationSimilarity...");
@@ -225,6 +225,8 @@ public class ClusterSVD extends MethodBasedOnDistanceTW{
 //		testData = getData(filePath);
 		getTestData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
+		
+		fillMissingProg();
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
 //		computeCityBlockSimilarity(trainFile);
@@ -241,7 +243,7 @@ public class ClusterSVD extends MethodBasedOnDistanceTW{
 		clustering(clusterNum);
 		buildMultiItemVector();		
 //		getRatingMatrixBySVD(50, 0.5, 0.01);
-		getRatingMatrixBySVDAllItems(50, 0.5, 0.01);
+		getRatingMatrixBySVDAllItems(20, 0.5, 0.01);
 		
 		sortItemsForUser();
 		getPreAndRecallAndF();

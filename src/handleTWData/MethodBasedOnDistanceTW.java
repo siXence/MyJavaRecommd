@@ -85,7 +85,7 @@ public class MethodBasedOnDistanceTW  extends MethodBasedOnSimilarityTW{
 		for (int k = 0; k < K; k++) {
 			int x = 0;
 			int y = 0;
-			double sim = 0.0;
+			double sim = -1.0;
 			for (int i = 0; i < itemList.size(); i++) {
 				int iTerm = itemList.get(i);
 				for (int j = i+1; j < itemList.size(); j++) {
@@ -172,5 +172,35 @@ public class MethodBasedOnDistanceTW  extends MethodBasedOnSimilarityTW{
 		System.out.println("buildItemVector 运行时间：" + (end - start) + "毫秒");
 		
 	}
+	
+	public void buildSingleItemVector() {
+		System.out.println("Start to build itemVector...");
+		long start = System.currentTimeMillis();		
+		
+		
+		int[] centers = new int[clusterNum];
+		
+		Set<Integer> keys = clusterResult.keySet();
+		Iterator<Integer> iterator = keys.iterator();
+		int idx = 0;
+		while (iterator.hasNext()) {
+			int key = iterator.next();
+			centers[idx] = key;
+			idx++;
+		}
+		
+		for (int i = 0; i < item_num; i++) {
+			for (int j = 0; j < clusterNum; j++) {
+				if (clusterResult.get(centers[j]).contains(i)) {
+					itemVector[i][j] = 1.0;
+					break;
+				}
+			}
 
+			
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("buildItemVector 运行时间：" + (end - start) + "毫秒");
+
+	}
 }
