@@ -227,6 +227,7 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
 		fillMissingProg();
+		computeItemAverage();
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
 //		computeCityBlockSimilarity(trainFile);
@@ -241,9 +242,11 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 //		readSimiMatrixFile(filePath);
 		
 		clustering(clusterNum);
-		buildMultiItemVector();		
+//		buildMultiItemVector();	
+		buildMultiItemVector2();
+//		buildMultiItemVector3();
 //		getRatingMatrixBySVD(50, 0.5, 0.01);
-		getRatingMatrixBySVDAllItems(20, 0.5, 0.01);
+		getRatingMatrixBySVDAllItems(20, 0.05, 0.01);
 		
 		sortItemsForUser();
 		getPreAndRecallAndF();

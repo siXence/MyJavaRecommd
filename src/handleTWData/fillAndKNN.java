@@ -3,11 +3,15 @@
  */
 package handleTWData;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.apache.mahout.cf.taste.common.TasteException;
 
 /**
  * @author xv
@@ -15,9 +19,9 @@ import java.util.Set;
  */
 public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	
-	protected final double lambda = 0.5;
-	protected final int closedCluNum = 20;
-	protected final int userNeigh = 20;
+	protected final double lambda = 0.35;
+	protected final int closedCluNum = 50;
+	protected final int userNeigh = 30;
 	
 	
 	/**
@@ -27,7 +31,7 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	 */
 	public ArrayList<Integer>  neighborPreSelect(int uid) {
 		ArrayList<Integer> users = new ArrayList<Integer>();
-		ArrayList<String> simCluster = new ArrayList<String>();
+		ArrayList<ArrayList<Double>> simCluster = new ArrayList<ArrayList<Double>>();
 		Set<Integer> keys = userCluster.keySet();
 		Iterator<Integer> iterator = keys.iterator();
 		while (iterator.hasNext()) {
@@ -46,6 +50,7 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 				}
 				
 			}
+//			System.out.println("itemsAll = " + itemsAll);
 			double numerator = 0.0;
 			double denom1 = 0.0;
 			double denom2 = 0.0;
@@ -66,22 +71,56 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 					denom1 += deltaR*deltaR;
 					denom2 += (trainData.get(uid).get(iid)-userAvg.get(uid))*(trainData.get(uid).get(iid)-userAvg.get(uid));
 				}
-				if (denom1 > 0 && denom2 > 0) {
-					String tmp = String.valueOf(numerator/(Math.sqrt(denom1*denom2))) + "\t" + String.valueOf(key);
-					simCluster.add(tmp);
-				}
+				
 			}
+			
+			ArrayList<Double> tmp = new ArrayList<Double>();
+			if (denom1 > 0 && denom2 > 0) {
+				tmp.add(numerator/(Math.sqrt(denom1*denom2)));
+			} else {
+				tmp.add(0.0);
+			}
+			
+			tmp.add((double) (key));
+			simCluster.add(tmp);
+			
+//			if (denom1 > 0 && denom2 > 0) {
+////				String tmp = String.valueOf(numerator/(Math.sqrt(denom1*denom2))) + "\t" + String.valueOf(key);
+//				ArrayList<Double> tmp = new ArrayList<Double>();
+//				tmp.add(numerator/(Math.sqrt(denom1*denom2)));
+//				tmp.add((double) (key));
+//				simCluster.add(tmp);
+//			}
 		}
-		
-		Collections.sort(simCluster);
+		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+		Collections.sort(simCluster, new Comparator<Object>(){
+			public int compare(Object obj1,Object obj2){
+		        @SuppressWarnings("unchecked")
+				ArrayList<Double> a=(ArrayList<Double>)obj1;
+		        @SuppressWarnings("unchecked")
+				ArrayList<Double> b=(ArrayList<Double>)obj2;
+		        Double v1=a.get(0);
+		        Double v2=b.get(0);
+		        if(v1==v2){return 0;}
+		        if(v1>v2){return 1;}
+		        return -1;
+		    }
+		});
 		Collections.reverse(simCluster);
+//		System.out.println("simCluster = " + simCluster);
 		
+		int userCnt = 0;
 		for (int i = 0; i < closedCluNum; i++) {
-			String[] tmp = simCluster.get(i).split("\t");
-			ArrayList<Integer> usersInCluster = userCluster.get(Integer.parseInt(tmp[1]));
+//			String[] tmp = simCluster.get(i).split("\t");
+			int id = Integer.parseInt(new java.text.DecimalFormat("0").format(simCluster.get(i).get(1)));
+			ArrayList<Integer> usersInCluster = userCluster.get(id);
 			for (Integer u:usersInCluster) {
 				if (!users.contains(u)) {
 					users.add(u);
+					userCnt++;
+					if (userCnt > userNeigh) {
+						break;
+					}
 				}
 			}
 		}
@@ -90,10 +129,10 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	}
 	
 	
-	public ArrayList<String>  neighborSelection(int uid) {
+	public ArrayList<ArrayList<Double>>  neighborSelection(int uid) {
 		ArrayList<Integer> users = neighborPreSelect(uid);
 //		uid--;
-		ArrayList<String> simUserInCluster = new ArrayList<String>();
+		ArrayList<ArrayList<Double>> simUserInCluster = new ArrayList<ArrayList<Double>>();
 		double numerator = 0.0;
 		double denom1 = 0.0;
 		double denom2 = 0.0;
@@ -120,13 +159,29 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 					userSim[u-1][uid-1] = sim;
 				}
 				
-				String tmp = String.valueOf(sim) + "\t" + String.valueOf(u);		
+//				String tmp = String.valueOf(sim) + "\t" + String.valueOf(u);		
+				ArrayList<Double> tmp = new ArrayList<Double>();
+				tmp.add(sim);
+				tmp.add((double) (u));
 				simUserInCluster.add(tmp); 
 			}
 			
 			
 		}
-		Collections.sort(simUserInCluster);
+		System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+		Collections.sort(simUserInCluster, new Comparator<Object>(){
+			public int compare(Object obj1,Object obj2){
+		        @SuppressWarnings("unchecked")
+				ArrayList<Double> a=(ArrayList<Double>)obj1;
+		        @SuppressWarnings("unchecked")
+				ArrayList<Double> b=(ArrayList<Double>)obj2;
+		        Double v1=a.get(0);
+		        Double v2=b.get(0);
+		        if(v1==v2){return 0;}
+		        if(v1>v2){return 1;}
+		        return -1;
+		    }
+		});
 		Collections.reverse(simUserInCluster);
 		return simUserInCluster;
 
@@ -161,23 +216,121 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	
 	public void computePrediction() {
 		for (int uid = 1; uid <= user_num; uid++) {
-			ArrayList<String> simUserInCluster  = neighborSelection(uid);
+			ArrayList<ArrayList<Double>> simUserInCluster  = neighborSelection(uid);
 			for (int iid = 1; iid <= item_num; iid++) {
 				double numerator = 0.0;
 				double denom = 0.0;
 				for (int i = 0; i < userNeigh && i < simUserInCluster.size(); i++) {
-					String[] tmp = simUserInCluster.get(i).split("\t");
-					int id = Integer.parseInt(tmp[1]);
+					int id = Integer.parseInt(new java.text.DecimalFormat("0").format(simUserInCluster.get(i).get(1)));
 					double wui = lambda;
 					if (trainData.get(id).containsKey(iid)) {
 						wui = 1-wui;
 					}
-					numerator += wui*getUserSim(uid, id)*(upmat[id-1][iid-1] - userAvg.get(id));
-					denom += wui*getUserSim(uid, id);
+					numerator += wui*getUserSim(uid-1, id-1)*(upmat[id-1][iid-1] - userAvg.get(id));
+					denom += wui*getUserSim(uid-1, id-1);
 				}
 				ratingMatrix[uid-1][iid-1] = userAvg.get(uid) + numerator/denom;
 			}
 		}
+	}
+	
+	
+	public void fillMissingUPmat() {
+		for (int uid = 1; uid <= user_num; uid++) {
+			ArrayList<ArrayList<Double>> simUserInCluster  = neighborSelection(uid);
+			for (int iid = 1; iid <= item_num; iid++) {
+				if (!trainData.get(uid).containsKey(iid)) {
+					double numerator = 0.0;
+					double denom = 0.0;
+					for (int i = 0; i < userNeigh && i < simUserInCluster.size(); i++) {
+						int id = Integer.parseInt(new java.text.DecimalFormat("0").format(simUserInCluster.get(i).get(1)));
+						double wui = lambda;
+						if (trainData.get(id).containsKey(iid)) {
+							wui = 1-wui;
+						}
+						numerator += wui*getUserSim(uid-1, id-1)*(upmat[id-1][iid-1] - userAvg.get(id));
+						denom += wui*getUserSim(uid-1, id-1);
+					}
+					ratingMatrix[uid-1][iid-1] = userAvg.get(uid) + numerator/denom;
+				}
+			}
+		}
+	}
+	
+	public void ourMethod() throws IOException, TasteException {
+		System.out.println("Starting...");
+		long start = System.currentTimeMillis();
+		String filePath = "/home/xv/DataForRecom/saveData/ua.base";
+		
+		initRatingMatrix();
+		
+//		trainData = getData(filePath);
+		getTrainData(filePath);
+		filePath = "/home/xv/DataForRecom/saveData/ua.test";
+		System.out.println("contain = " + trainData.containsKey(13));
+		
+//		testData = getData(filePath);
+		getTestData(filePath);
+		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
+		
+		fillMissingProg();
+		computeItemAverage();
+		computePrediction();
+
+//		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
+////		computeCityBlockSimilarity(trainFile);
+//		
+//		filePath = "/home/xv/DataForRecom/saveData/simiMatrixByHandFill.txt";
+////		writeSimiMatrixIntoFile(filePath);
+////		
+////		computeSimilary();
+////		reComputeItemSim();
+//		
+//		computeSimilaryAllItems() ;
+////		readSimi() ;
+//		
+//		writeSimiMatrixIntoFile(filePath);
+//		
+////		readSimiMatrixFile(filePath);
+//		
+//		clustering(clusterNum);
+//		
+////		saveClusterResult() ;
+////		getClustersCenters();
+//		
+////		buildMultiItemVector();		
+////		buildMultiItemVector2();		
+//		buildMultiItemVector3();
+////		buildSingleItemVector();
+//		
+////		buildUserVectorBySum();
+//		buildUserVectorBySumAll();
+//		getRatingMatrix();
+//		
+////		saveUPrec();
+//		
+//		
+//		
+////		getRatingMatrixBySVD(50, 0.5, 0.01);
+////		getRatingMatrixBySVDAllItems(50, 0.5, 0.01);
+		
+		sortItemsForUser();
+		
+		
+//		updateTrainTestSetFromFile() ;
+		
+		
+		getPreAndRecallAndF();
+		
+		System.out.println("cluster.size() = " + clusterResult.size());
+		long end = System.currentTimeMillis();
+		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
+	}
+	
+	
+	public static void main(String[] args) throws Exception {
+		fillAndKNN fk = new fillAndKNN();
+		fk.ourMethod();
 	}
 	
 	

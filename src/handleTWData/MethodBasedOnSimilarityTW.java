@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,26 +23,27 @@ import java.util.Set;
  *
  */
 public class MethodBasedOnSimilarityTW {
-	protected final int user_num = 2318;
-	protected final int item_num = 4358;
-	protected final int clusterNum = 400;
-	protected final double averg = 0.5016;
+//	protected final int user_num = 2318;
+//	protected final int item_num = 4358;
+//	protected final int clusterNum = 200;
+//	protected final double averg = 0.7915;
 	
 //	protected final int user_num = 943;
 //	protected final int item_num = 1682;
 //	protected final int clusterNum = 100;
 //	protected final double averg = 3;
 	
-//	protected final int user_num = 4000;
-//	protected final int item_num = 3000;
-//	protected final int clusterNum = 300;
-//	protected final double averg = 0.7898;
+	protected final int user_num = 4000;
+	protected final int item_num = 3000;
+	protected final int clusterNum = 200;
+	protected final double averg = 0.9394;
 	
-	protected final int userClusterNum = 250;
+	protected final int userClusterNum = 100;
 	
 	protected HashMap<Integer, HashMap<Integer, Double> > trainData = new HashMap<Integer, HashMap<Integer, Double> >();
 	protected HashMap<Integer, HashMap<Integer, Double> > testData = new HashMap<Integer, HashMap<Integer, Double> >();
 	protected HashMap<Integer, Integer> itemCnt = new HashMap<Integer, Integer>();
+	protected HashMap<Integer, HashMap<Integer, Double>> itemByUsers = new HashMap<Integer,HashMap<Integer, Double>>();
 	//	protected int[][] trainData = new int[user_num][item_num];
 //	protected int[][] testData = new int[user_num][item_num];
 //	protected double[][] simiMatrix = new double[item_num][item_num];
@@ -61,6 +63,7 @@ public class MethodBasedOnSimilarityTW {
 	protected ArrayList<ArrayList<Integer>> recomItems = new ArrayList<ArrayList<Integer>>();
 	
 	protected HashMap<Integer, Double> userAvg = new HashMap<Integer, Double>();
+	protected HashMap<Integer, Double> itemAvg = new HashMap<Integer, Double>();
 //	protected HashMap<Integer, Double> userVar = new HashMap<Integer, Double>();
 	
 //	protected Integer[][]  userToCluster = new Integer[user_num][userClusterNum]; 
@@ -68,7 +71,7 @@ public class MethodBasedOnSimilarityTW {
 	public void initRatingMatrix() {
 		for (int i = 0; i < user_num; i++) {
 			for (int j = 0; j < item_num; j++) {
-				upmat[i][j] = 0.0;
+				upmat[i][j] = 0.5;
 			}
 		}
 	}
@@ -107,6 +110,26 @@ public class MethodBasedOnSimilarityTW {
 		return dataSet;
 		
 			
+	}
+	
+	public void reComputeItemSim() {
+		for (int i = 1; i <= item_num; i++) {
+			for (int j = i; j <= item_num; j++) {
+				boolean isEnter = false;
+				HashMap<Integer, Double> itemI = itemByUsers.get(i);
+				HashMap<Integer, Double> itemJ = itemByUsers.get(j);;
+				double s = 0.0;
+				for (int uid = 1; uid <= user_num; uid++) {
+					if (itemI != null && itemI.containsKey(uid) && itemJ != null &&  itemJ.containsKey(uid)) {
+						isEnter = true;
+						s += Math.abs(upmat[uid-1][i-1] - upmat[uid-1][j-1]);
+					}
+				}
+				if (isEnter) {
+					simiMatrix[i-1][j-1]  = 1/(1+s);
+				}
+			}
+		}
 	}
 	
 	public void computeSimilary() {
@@ -221,7 +244,12 @@ public class MethodBasedOnSimilarityTW {
                     if (!trainData.containsKey(uid)) {
                     	trainData.put(uid, new HashMap<Integer, Double>());
                     } 
+                    
+                    if (!itemByUsers.containsKey(iid)) {
+                    	itemByUsers.put(iid, new HashMap<Integer, Double>());
+                    }
                     trainData.get(uid).put(iid, rating);
+                    itemByUsers.get(iid).put(uid, rating);
                     
                     upmat[uid-1][iid-1] = rating;
                     
@@ -405,10 +433,10 @@ public class MethodBasedOnSimilarityTW {
 			}
 			itemList.clear();
 			itemList = clusterResult.get(centerWithMostItems);
+			k++;
 			if (k < K-1) {
 				clusterResult.remove(centerWithMostItems);
 			}
-			k++;
 //			System.out.println("the clusters  = " + k);
 		}
 		
@@ -497,6 +525,35 @@ public class MethodBasedOnSimilarityTW {
 		System.out.println("computeUserAverage 运行时间：" + (end - start) + "毫秒");
 	}
 	
+	public void computeItemAverage() {
+		long start = System.currentTimeMillis();
+		System.out.println("Start to computeItemAverage...");
+		Set<Integer> keys = itemByUsers.keySet();
+		Iterator<Integer> iterator = keys.iterator();
+		while (iterator.hasNext()) {
+			int key = iterator.next();
+			HashMap<Integer, Double> tmp = itemByUsers.get(key);
+			Set<Integer> keysItem = tmp.keySet();
+			Iterator<Integer> iteratorItem = keysItem.iterator();
+			Double avg = 0.0;
+			int cnt = 0;
+			while (iteratorItem.hasNext()) {
+				int keyItem = iteratorItem.next();
+//				System.out.println("keyItem = " + keyItem);
+				double tmpItem = tmp.get(keyItem);
+				cnt++;
+				avg += tmpItem;
+			}
+			avg /= cnt;
+			itemAvg.put(key, avg);
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("itemAvg = " + itemAvg);
+		System.out.println("computeItemAverage 运行时间：" + (end - start) + "毫秒");
+	}
+	
+	
+	
 	public void computeUserSimi() {
 		long start = System.currentTimeMillis();
 		System.out.println("Start to computeUserSimi...");
@@ -533,12 +590,8 @@ public class MethodBasedOnSimilarityTW {
 //		for (int i = 1; i <= user_num; i++) {
 //			for (int j = i; j <= user_num; j++) {
 //				HashMap<Integer, Double> itemI = trainData.get(i);
-//				HashMap<Integer, Double> itemJ = trainData.get(j);
-//				double avg1 = userAvg.get(i);
-//				double avg2 = userAvg.get(j);
+//				HashMap<Integer, Double> itemJ = trainData.get(j);;
 //				double s = 0.0;
-//				double var1 = 0.0;
-//				double var2 = 0.0;
 //				boolean isEnter = false;
 //				Set<Integer> keys = itemI.keySet();
 //				Iterator<Integer> iterator = keys.iterator();
@@ -557,26 +610,26 @@ public class MethodBasedOnSimilarityTW {
 		
 		
 //		xiangliang's     s3
-//		for (int i = 1; i <= user_num; i++) {
-//			for (int j = i; j <= user_num; j++) {
-//				HashMap<Integer, Double> itemI = trainData.get(i);
-//				HashMap<Integer, Double> itemJ = trainData.get(j);
-//				int cnt = 0;
-//				boolean isEnter = false;
-//				Set<Integer> keys = itemI.keySet();
-//				Iterator<Integer> iterator = keys.iterator();
-//				while (iterator.hasNext()) {
-//					int key = iterator.next();
-//					if (itemJ.containsKey(key)) {
-//						isEnter = true;
-//						cnt++;
-//					}
-//				}
-//				if (isEnter) {
-//					userSim[i-1][j-1]  = cnt*1.0/(itemI.size()*itemJ.size());
-//				}
-//			}
-//		}
+		for (int i = 1; i <= user_num; i++) {
+			for (int j = i; j <= user_num; j++) {
+				HashMap<Integer, Double> itemI = trainData.get(i);
+				HashMap<Integer, Double> itemJ = trainData.get(j);
+				int cnt = 0;
+				boolean isEnter = false;
+				Set<Integer> keys = itemI.keySet();
+				Iterator<Integer> iterator = keys.iterator();
+				while (iterator.hasNext()) {
+					int key = iterator.next();
+					if (itemJ.containsKey(key)) {
+						isEnter = true;
+						cnt++;
+					}
+				}
+				if (isEnter) {
+					userSim[i-1][j-1]  = cnt*1.0/(itemI.size()*itemJ.size());
+				}
+			}
+		}
 		
 		
 		//s4  correct popular programs
@@ -585,8 +638,6 @@ public class MethodBasedOnSimilarityTW {
 				HashMap<Integer, Double> itemI = trainData.get(i);
 				HashMap<Integer, Double> itemJ = trainData.get(j);
 				double s = 0.0;
-				double var1 = 0.0;
-				double var2 = 0.0;
 				boolean isEnter = false;
 				Set<Integer> keys = itemI.keySet();
 				Iterator<Integer> iterator = keys.iterator();
@@ -769,42 +820,42 @@ public class MethodBasedOnSimilarityTW {
 					
 					
 					
-					int cnt = 0;
-					for (int uid = 0; uid < users.size(); uid++) {
-						if (trainData.get(users.get(uid)+1).containsKey(j+1)) {
-							cnt++;
-							deltaR += (trainData.get(users.get(uid)+1).get(j+1) - userAvg.get(users.get(uid)+1));
-						}
-					}
-					if (cnt > 0) {
-						deltaR /= cnt;
-						//linear
-						if (deltaR > 1) {
-							deltaR = 1;
-						}
-					
-					
-//					//xiangliang ' compute preference
 //					int cnt = 0;
-//					deltaR = 0.0;
 //					for (int uid = 0; uid < users.size(); uid++) {
 //						if (trainData.get(users.get(uid)+1).containsKey(j+1)) {
 //							cnt++;
-//							deltaR += userSim[i][users.get(uid)]*trainData.get(users.get(uid)+1).get(j+1);
+//							deltaR += (trainData.get(users.get(uid)+1).get(j+1) - userAvg.get(users.get(uid)+1));
 //						}
 //					}
 //					if (cnt > 0) {
+//						deltaR /= cnt;
 //						//linear
 //						if (deltaR > 1) {
 //							deltaR = 1;
 //						}
+					
+					
+					//xiangliang ' compute preference
+					int cnt = 0;
+					deltaR = 0.0;
+					for (int uid = 0; uid < users.size(); uid++) {
+						if (trainData.get(users.get(uid)+1).containsKey(j+1)) {
+							cnt++;
+							deltaR += userSim[i][users.get(uid)]*trainData.get(users.get(uid)+1).get(j+1);
+						}
+					}
+					if (cnt > 0) {
+						//linear
+						if (deltaR > 1) {
+							deltaR = 1;
+						}
 			
 
 //						upmat[i][j] = 0.0;   //0.2446
-						upmat[i][j] = 0.5;  //0.1708
+//						upmat[i][j] = 0.5;  //0.1708
 //						upmat[i][j] = Math.random(); //0.1018
 //						upmat[i][j] =  userAvg.get(i+1);  //0.1108
-//						upmat[i][j] = deltaR;  //0.0798(s1)     0.1328(s2)      0.096(s3)     0.1566(prefer2, s3)   0.1350(s2, p2)　　　0.1553(s1, p2)
+						upmat[i][j] = deltaR;  //0.0798(s1)     0.1328(s2)      0.096(s3)     0.1566(prefer2, s3)   0.1350(s2, p2)　　　0.1553(s1, p2)
 						allCnt++;
 					}
 
@@ -822,7 +873,7 @@ public class MethodBasedOnSimilarityTW {
 		computeUserAverage() ;
 		computeUserSimi();
 		String path = "/home/xv/DataForRecom/saveData/userSim.txt";
-//		saveUserSim(path);
+		saveUserSim(path);
 		userClustering(userClusterNum-1);
 		fillMissingData();
 		path = "/home/xv/DataForRecom/saveData/upmat.txt";
@@ -855,16 +906,126 @@ public class MethodBasedOnSimilarityTW {
 				sum += tmp;
 				itemVector[i][j] = tmp;
 			}
-			for (int j = 0; j < clusterNum; j++) {
-				itemVector[i][j] /= sum;
-				if (itemVector[i][j] < 0.01) {
-					itemVector[i][j] = 0.0;
+			if (sum > 0) {
+				for (int j = 0; j < clusterNum; j++) {
+					itemVector[i][j] /= sum;
+					if (itemVector[i][j] < 0.01) {
+						itemVector[i][j] = 0.0;
+					}
 				}
 			}
+			
 		}
 		long end = System.currentTimeMillis();
 		System.out.println("buildItemVector 运行时间：" + (end - start) + "毫秒");
 	}
+	
+	
+	
+	public void buildMultiItemVector2() {
+		System.out.println("Start to build itemVector2...");
+		long start = System.currentTimeMillis();		
+			
+		for (int i = 0; i < item_num; i++) {
+			double sum = 0.0;
+//			for (int c = 0; c < clusterNum; c++) {
+//				double numer = 0.0;
+//				double denom1 = 0.0;
+//				double denom2 = 0.0;
+				
+				Set<Integer> keys = clusterResult.keySet();
+				Iterator<Integer> iterator = keys.iterator();
+				int c = 0;
+				while (iterator.hasNext()) {
+					int key = iterator.next();
+					ArrayList<Integer> itemsInCluster = clusterResult.get(key);
+					ArrayList<Integer> usersAll = new ArrayList<Integer>();
+					for (Integer item:itemsInCluster) {
+						HashMap<Integer, Double> items = itemByUsers.get(item+1);
+						Set<Integer> uids = items.keySet();
+						Iterator<Integer> iter = uids.iterator();
+						while(iter.hasNext()) {
+							int uid = iter.next();
+							if (!usersAll.contains(uid)) {
+								usersAll.add(uid);
+							}
+						}
+						
+					}
+					double numerator = 0.0;
+					double denom1 = 0.0;
+					double denom2 = 0.0;
+					for (Integer uid:usersAll) {
+						if (itemByUsers.get(i+1).containsKey(uid)) {
+							double deltaR = 0.0;
+							int cnt = 0;
+							for (Integer itemInClu:itemsInCluster) {
+								if (itemByUsers.get(itemInClu+1).containsKey(uid)) {
+									cnt++;
+									deltaR +=( itemByUsers.get(itemInClu+1).get(uid) - itemAvg.get(itemInClu+1));
+								}
+							}
+							if (cnt > 0) {
+								deltaR /= cnt;
+							}
+							numerator += deltaR*(itemByUsers.get(i+1).get(uid)-itemAvg.get(i+1));
+							denom1 += deltaR*deltaR;
+							denom2 += (itemByUsers.get(i+1).get(uid)-itemAvg.get(i+1))*(itemByUsers.get(i+1).get(uid)-itemAvg.get(i+1));
+						}
+					}
+					if (denom1 > 0 && denom2 > 0) {
+						itemVector[i][c] = numerator/(Math.sqrt(denom1*denom2));
+						sum += numerator/(Math.sqrt(denom1*denom2));
+					}
+					c++;
+				}
+				if (sum > 0) {
+					for (c = 0; c < clusterNum; c++) {
+						itemVector[i][c] /= sum;
+					}
+				}
+				
+
+//			}
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("buildItemVector 2运行时间：" + (end - start) + "毫秒");
+	}
+	
+	
+	public void buildMultiItemVector3() {
+		System.out.println("Start to build itemVector2...");
+		long start = System.currentTimeMillis();		
+			
+		for (int i = 0; i < item_num; i++) {
+
+				
+				Set<Integer> keys = clusterResult.keySet();
+				Iterator<Integer> iterator = keys.iterator();
+				int c = 0;
+				while (iterator.hasNext()) {
+					int key = iterator.next();
+					ArrayList<Integer> itemsInCluster = clusterResult.get(key);
+					int cnt = 0;
+					double s = 0.0;
+					for (Integer item:itemsInCluster) {
+						s += simiMatrix[i][item];
+						cnt++;
+					}
+					if (cnt > 0) {
+						s /= cnt;
+					}
+					itemVector[i][c] = s;
+					
+				}
+
+//			}
+		}
+		long end = System.currentTimeMillis();
+		System.out.println("buildItemVector 2运行时间：" + (end - start) + "毫秒");
+	}
+	
+	
 	
 //	public void buildUserVectorBySum() {
 //		System.out.println("Start to build userVector...");
@@ -966,22 +1127,42 @@ public class MethodBasedOnSimilarityTW {
 	public void sortItemsForUser() {
 		System.out.println("Start to sortItemsForUser...");
 		long start = System.currentTimeMillis();		
-		ArrayList<String> sortedItems = new ArrayList<String>();
+		ArrayList<ArrayList<Double>> sortedItems = new ArrayList<ArrayList<Double>>();
 		for (int i = 0; i < user_num; i++) {
 			sortedItems.clear();
 			for (int j = 0; j < item_num; j++) {
-				String tmp = String.valueOf(ratingMatrix[i][j]) + "\t" + String.valueOf(j+1);
+				ArrayList<Double> tmp = new ArrayList<Double>();
+				tmp.add(ratingMatrix[i][j]);
+				tmp.add((double) (j+1));
+				
+//				String tmp = String.valueOf(ratingMatrix[i][j]) + "\t" + String.valueOf(j+1);
 				sortedItems.add(tmp);
 			}
-			Collections.sort(sortedItems);
+			System.setProperty("java.util.Arrays.useLegacyMergeSort", "true");
+			Collections.sort(sortedItems, new Comparator<Object>(){
+				public int compare(Object obj1,Object obj2){
+			        @SuppressWarnings("unchecked")
+					ArrayList<Double> a=(ArrayList<Double>)obj1;
+			        @SuppressWarnings("unchecked")
+					ArrayList<Double> b=(ArrayList<Double>)obj2;
+			        Double v1=a.get(0);
+			        Double v2=b.get(0);
+			        if(v1==v2){return 0;}
+			        if(v1>v2){return 1;}
+			        return -1;
+			    }
+			});
 			Collections.reverse(sortedItems);
 			ArrayList<Integer> itemIDs = new ArrayList<Integer>();
 			for (int j = 0; j < item_num; j++) {
-				String[] info = sortedItems.get(j).split("\t");
-				itemIDs.add(Integer.parseInt(info[1]));
+				int id = Integer.parseInt(new java.text.DecimalFormat("0").format(sortedItems.get(j).get(1)));
+//				int id = (int)sortedItems.get(j).get(1);
+//				String[] info = sortedItems.get(j).split("\t");
+				itemIDs.add(id);
 			}
-			if (i == 0) {
+			if (i < 10) {
 				System.out.println("recommend 1 =   " + itemIDs);
+				System.out.println(sortedItems);
 			}
 			recomItems.add(itemIDs);
 		}

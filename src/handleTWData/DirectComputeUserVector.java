@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -39,7 +41,8 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 		getTestData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
-		fillMissingProg();
+//		fillMissingProg();
+		computeItemAverage();
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
 //		computeCityBlockSimilarity(trainFile);
@@ -48,20 +51,23 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 //		writeSimiMatrixIntoFile(filePath);
 //		
 //		computeSimilary();
+//		reComputeItemSim();
 		
 		computeSimilaryAllItems() ;
 //		readSimi() ;
 		
-//		writeSimiMatrixIntoFile(filePath);
+		writeSimiMatrixIntoFile(filePath);
 		
 //		readSimiMatrixFile(filePath);
 		
-		clustering(clusterNum-1);
+		clustering(clusterNum);
 		
 //		saveClusterResult() ;
 //		getClustersCenters();
 		
-		buildMultiItemVector();		
+//		buildMultiItemVector();		
+//		buildMultiItemVector2();		
+		buildMultiItemVector3();
 //		buildSingleItemVector();
 		
 //		buildUserVectorBySum();
@@ -317,6 +323,36 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 		DirectComputeUserVector dh = new DirectComputeUserVector();
 		dh.ourMethod();
 		System.out.println("Done");
+		
+		
+//		ArrayList<ArrayList<Integer>> tmp = new ArrayList<ArrayList<Integer>>();
+//		ArrayList<Integer> t = new ArrayList<Integer>();
+//		t.add(10);
+//		t.add(5);
+//		tmp.add(t);
+//		ArrayList<Integer> t1 = new ArrayList<Integer>();
+//		t1.add(4);
+//		t1.add(2);
+//		tmp.add(t1);
+//		ArrayList<Integer> t2 = new ArrayList<Integer>();
+//		t2.add(2);
+//		t2.add(3);
+//		tmp.add(t2);
+//		Collections.sort(tmp, new Comparator<Object>(){
+//				public int compare(Object obj1,Object obj2){
+//			        @SuppressWarnings("unchecked")
+//					ArrayList<Integer> a=(ArrayList<Integer>)obj1;
+//			        @SuppressWarnings("unchecked")
+//					ArrayList<Integer> b=(ArrayList<Integer>)obj2;
+//			        int v1=a.get(0);
+//			        int v2=b.get(0);
+//			        if(v1==v2){return 0;}
+//			        if(v1>v2){return 1;}
+//			        return -1;
+//			    }
+//			});
+//		Collections.reverse(tmp);
+//		System.out.println(tmp);
 		
 		
 //		List<String> tmp = new ArrayList<String>();

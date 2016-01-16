@@ -458,6 +458,8 @@ public class GetDataFromOrigin {
 	
 	public static void main(String[] args) throws Exception {
 		GetDataFromOrigin tmp = new GetDataFromOrigin();
+		
+		
 		String proInfo = "/home/xv/DataForRecom/saveData/programInfo.txt";
 		tmp.getProLength(proInfo);
 		String path = "/home/xv/DataForRecom/originData/";
