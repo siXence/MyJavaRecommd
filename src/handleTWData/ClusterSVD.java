@@ -3,8 +3,11 @@
  */
 package handleTWData;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -209,7 +212,30 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 	
 	
 	
-	
+	public void saveUPrec() {
+//		String filePath = "/home/xv/DataForRecom/saveData/singelUPrec.txt";
+		String filePath = "/home/xv/DataForRecom/saveData/SVDUPrec.txt";
+		try {
+		    File f = new File(filePath);
+		    if (!f.exists()) {
+		    	f.createNewFile();
+		    }
+		    OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(f),"UTF-8");
+		    BufferedWriter writer = new BufferedWriter(write);
+		    for (int i = 0; i < user_num; i++) {
+		    	String tmp = String.valueOf(ratingMatrix[i][0]);
+		    	for (int j = 1; j < item_num; j++) {
+		    		tmp += "\t" + String.valueOf(ratingMatrix[i][j]);
+		    	}
+		    	tmp += "\n";
+		    	writer.write(tmp);
+		    }
+		    
+		    writer.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
 	
 	
 	public void ourMethod() throws IOException, TasteException {
@@ -226,27 +252,30 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 		getTestData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
-		fillMissingProg();
+//		fillMissingProg();
 		computeItemAverage();
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
 //		computeCityBlockSimilarity(trainFile);
 		
-//		filePath = "/home/xv/DataForRecom/saveData/simiMatrixByHand.txt";
+		filePath = "/home/xv/DataForRecom/saveData/simiMatrixByHand.txt";
 //		writeSimiMatrixIntoFile(filePath);
 //		
 //		computeSimilary();
-		computeSimilaryAllItems() ;
-//		writeSimiMatrixIntoFile(filePath);
+		reComputeItemSim();
+//		computeSimilaryAllItems() ;
+		writeSimiMatrixIntoFile(filePath);
 		
 //		readSimiMatrixFile(filePath);
 		
 		clustering(clusterNum);
 //		buildMultiItemVector();	
-		buildMultiItemVector2();
-//		buildMultiItemVector3();
-//		getRatingMatrixBySVD(50, 0.5, 0.01);
-		getRatingMatrixBySVDAllItems(20, 0.05, 0.01);
+//		buildMultiItemVector2();
+		buildMultiItemVector3();
+//		getRatingMatrixBySVD(30, 0.5, 0.01);
+		getRatingMatrixBySVDAllItems(30, 0.05, 0.01);
+		saveUPrec();
+		
 		
 		sortItemsForUser();
 		getPreAndRecallAndF();

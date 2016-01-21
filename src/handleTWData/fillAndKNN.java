@@ -3,7 +3,11 @@
  */
 package handleTWData;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,9 +23,9 @@ import org.apache.mahout.cf.taste.common.TasteException;
  */
 public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	
-	protected final double lambda = 0.35;
+	protected final double lambda = 0.2;
 	protected final int closedCluNum = 50;
-	protected final int userNeigh = 30;
+	protected final int userNeigh = 50;
 	
 	
 	/**
@@ -214,6 +218,32 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 //	}
 	
 	
+	public void saveUPrec() {
+//		String filePath = "/home/xv/DataForRecom/saveData/singelUPrec.txt";
+//		String filePath = "/home/xv/DataForRecom/saveData/multiUPrec.txt";
+		String filePath = "/home/xv/DataForRecom/saveData/smoothKNNUPrec.txt";
+		try {
+		    File f = new File(filePath);
+		    if (!f.exists()) {
+		    	f.createNewFile();
+		    }
+		    OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(f),"UTF-8");
+		    BufferedWriter writer = new BufferedWriter(write);
+		    for (int i = 0; i < user_num; i++) {
+		    	String tmp = String.valueOf(ratingMatrix[i][0]);
+		    	for (int j = 1; j < item_num; j++) {
+		    		tmp += "\t" + String.valueOf(ratingMatrix[i][j]);
+		    	}
+		    	tmp += "\n";
+		    	writer.write(tmp);
+		    }
+		    
+		    writer.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
+	
 	public void computePrediction() {
 		for (int uid = 1; uid <= user_num; uid++) {
 			ArrayList<ArrayList<Double>> simUserInCluster  = neighborSelection(uid);
@@ -273,6 +303,11 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 		getTestData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
+		//simi s1  0.12
+		//simi s2  0.11
+		//simi s3  0.43
+		//simi s4  0.20
+		
 		fillMissingProg();
 		computeItemAverage();
 		computePrediction();
@@ -313,7 +348,7 @@ public class fillAndKNN extends MethodBasedOnSimilarityTW{
 //		
 ////		getRatingMatrixBySVD(50, 0.5, 0.01);
 ////		getRatingMatrixBySVDAllItems(50, 0.5, 0.01);
-		
+		saveUPrec();
 		sortItemsForUser();
 		
 		

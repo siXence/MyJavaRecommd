@@ -35,7 +35,7 @@ public class MethodBasedOnSimilarityTW {
 	
 	protected final int user_num = 4000;
 	protected final int item_num = 3000;
-	protected final int clusterNum = 200;
+	protected final int clusterNum = 300;
 	protected final double averg = 0.9394;
 	
 	protected final int userClusterNum = 100;
@@ -71,7 +71,7 @@ public class MethodBasedOnSimilarityTW {
 	public void initRatingMatrix() {
 		for (int i = 0; i < user_num; i++) {
 			for (int j = 0; j < item_num; j++) {
-				upmat[i][j] = 0.5;
+				upmat[i][j] = 0.0;
 			}
 		}
 	}
@@ -383,6 +383,8 @@ public class MethodBasedOnSimilarityTW {
 	
 	
 	public void clustering(int K) {
+		System.out.println("116 162 = " + getSim(116, 162) );
+		System.out.println("116 201 = " + getSim(116, 201) );
 		long start = System.currentTimeMillis();
 		System.out.println("Start to cluster...");
 		ArrayList<Integer> itemList = new ArrayList<Integer>();
@@ -406,8 +408,8 @@ public class MethodBasedOnSimilarityTW {
 					}
 				}
 			}
-//			System.out.println("x = " + x);
-//			System.out.println("y = " + y);
+			System.out.println("x = " + x);
+			System.out.println("y = " + y);
 			clusterResult.put(x, new ArrayList<Integer>());
 			clusterResult.put(y, new ArrayList<Integer>());
 //			System.out.println("clusterResult size() 1= " + clusterResult.size());
@@ -418,7 +420,8 @@ public class MethodBasedOnSimilarityTW {
 					clusterResult.get(y).add(id);
 				}
 			}
-
+			System.out.println("clusterResult.get(x) = " + clusterResult.get(x));
+			System.out.println("clusterResult.get(y) = " + clusterResult.get(y));
 			int centerWithMostItems = 0;
 			int cnt = 0;
 			Set<Integer> keys = clusterResult.keySet();
@@ -437,7 +440,8 @@ public class MethodBasedOnSimilarityTW {
 			if (k < K-1) {
 				clusterResult.remove(centerWithMostItems);
 			}
-//			System.out.println("the clusters  = " + k);
+			System.out.println("itemList = " + itemList);
+			System.out.println("item cluster size   = " + clusterResult.size());
 		}
 		
 		
@@ -626,33 +630,34 @@ public class MethodBasedOnSimilarityTW {
 					}
 				}
 				if (isEnter) {
+//					userSim[i-1][j-1]  = cnt*1.0/Math.sqrt(itemI.size()*itemJ.size());
 					userSim[i-1][j-1]  = cnt*1.0/(itemI.size()*itemJ.size());
 				}
 			}
 		}
 		
 		
-		//s4  correct popular programs
-		for (int i = 1; i <= user_num; i++) {
-			for (int j = i; j <= user_num; j++) {
-				HashMap<Integer, Double> itemI = trainData.get(i);
-				HashMap<Integer, Double> itemJ = trainData.get(j);
-				double s = 0.0;
-				boolean isEnter = false;
-				Set<Integer> keys = itemI.keySet();
-				Iterator<Integer> iterator = keys.iterator();
-				while (iterator.hasNext()) {
-					int key = iterator.next();
-					if (itemJ.containsKey(key)) {
-						isEnter = true;
-						s += 1/(Math.log(1+itemCnt.get(key)));
-					}
-				}
-				if (isEnter) {
-					userSim[i-1][j-1]  = s/(Math.sqrt(itemI.size())*Math.sqrt(itemJ.size()));
-				}
-			}
-		}
+//		//s4  correct popular programs
+//		for (int i = 1; i <= user_num; i++) {
+//			for (int j = i; j <= user_num; j++) {
+//				HashMap<Integer, Double> itemI = trainData.get(i);
+//				HashMap<Integer, Double> itemJ = trainData.get(j);
+//				double s = 0.0;
+//				boolean isEnter = false;
+//				Set<Integer> keys = itemI.keySet();
+//				Iterator<Integer> iterator = keys.iterator();
+//				while (iterator.hasNext()) {
+//					int key = iterator.next();
+//					if (itemJ.containsKey(key)) {
+//						isEnter = true;
+//						s += 1/(Math.log(1+itemCnt.get(key)));
+//					}
+//				}
+//				if (isEnter) {
+//					userSim[i-1][j-1]  = s/(Math.sqrt(itemI.size())*Math.sqrt(itemJ.size()));
+//				}
+//			}
+//		}
 		
 		
 		long end = System.currentTimeMillis();
@@ -777,6 +782,7 @@ public class MethodBasedOnSimilarityTW {
 		long start = System.currentTimeMillis();
 		System.out.println("Start to userClustering...");
 		for (int i = 0; i < user_num; i++) {
+			double maxV = 1.0;
 			ArrayList<Integer> users = new ArrayList<Integer>();
 			Set<Integer> keys = userCluster.keySet();
 			Iterator<Integer> iterator = keys.iterator();
@@ -846,21 +852,31 @@ public class MethodBasedOnSimilarityTW {
 					}
 					if (cnt > 0) {
 						//linear
-						if (deltaR > 1) {
-							deltaR = 1;
-						}
-			
+//						if (deltaR > 1) {
+////							deltaR = 1;
+//							System.out.println("deltaR = " + deltaR);
+//						}
+						maxV = Math.max(maxV,  deltaR);
 
 //						upmat[i][j] = 0.0;   //0.2446
 //						upmat[i][j] = 0.5;  //0.1708
 //						upmat[i][j] = Math.random(); //0.1018
 //						upmat[i][j] =  userAvg.get(i+1);  //0.1108
+						if (Double.isNaN(deltaR)) {
+							deltaR = 0.0;
+						}
 						upmat[i][j] = deltaR;  //0.0798(s1)     0.1328(s2)      0.096(s3)     0.1566(prefer2, s3)   0.1350(s2, p2)　　　0.1553(s1, p2)
 						allCnt++;
 					}
 
 				}
 			}
+			if (maxV > 0) {
+				for (int j = 0; j < item_num; j++) {
+					upmat[i][j] /= maxV;
+				}
+			}
+			
 		}
 		System.out.println("allCnt -------------------------------------------------> " + allCnt);
 		long end = System.currentTimeMillis();
@@ -877,7 +893,7 @@ public class MethodBasedOnSimilarityTW {
 		userClustering(userClusterNum-1);
 		fillMissingData();
 		path = "/home/xv/DataForRecom/saveData/upmat.txt";
-//		saveUPmat(path);
+		saveUPmat(path);
 	}
 	
 	
@@ -1160,7 +1176,7 @@ public class MethodBasedOnSimilarityTW {
 //				String[] info = sortedItems.get(j).split("\t");
 				itemIDs.add(id);
 			}
-			if (i < 10) {
+			if (i < 20 || i > user_num-10) {
 				System.out.println("recommend 1 =   " + itemIDs);
 				System.out.println(sortedItems);
 			}

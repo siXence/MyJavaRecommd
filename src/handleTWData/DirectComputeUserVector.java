@@ -65,16 +65,16 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 //		saveClusterResult() ;
 //		getClustersCenters();
 		
-//		buildMultiItemVector();		
+		buildMultiItemVector();		
 //		buildMultiItemVector2();		
-		buildMultiItemVector3();
+//		buildMultiItemVector3();
 //		buildSingleItemVector();
 		
 //		buildUserVectorBySum();
 		buildUserVectorBySumAll();
 		getRatingMatrix();
 		
-//		saveUPrec();
+		saveUPrec();
 		
 		
 		
@@ -95,7 +95,8 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 	}
 	
 	public void saveUPrec() {
-		String filePath = "/home/xv/DataForRecom/saveData/myUPrec.txt";
+//		String filePath = "/home/xv/DataForRecom/saveData/singelUPrec.txt";
+		String filePath = "/home/xv/DataForRecom/saveData/multiUPrec.txt";
 		try {
 		    File f = new File(filePath);
 		    if (!f.exists()) {
