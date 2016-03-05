@@ -23,7 +23,7 @@ import org.apache.mahout.cf.taste.common.TasteException;
  */
 public class fillAndKNN extends MethodBasedOnSimilarityTW{
 	
-	protected final double lambda = 0.2;
+	protected final double lambda = 0.3;
 	protected final int closedCluNum = 50;
 	protected final int userNeigh = 50;
 	

@@ -262,16 +262,16 @@ public class ClusterSVD extends MethodBasedOnSimilarityTW{
 //		writeSimiMatrixIntoFile(filePath);
 //		
 //		computeSimilary();
-		reComputeItemSim();
-//		computeSimilaryAllItems() ;
+//		reComputeItemSim();
+		computeSimilaryAllItems() ;
 		writeSimiMatrixIntoFile(filePath);
 		
 //		readSimiMatrixFile(filePath);
 		
 		clustering(clusterNum);
-//		buildMultiItemVector();	
+		buildMultiItemVector();	
 //		buildMultiItemVector2();
-		buildMultiItemVector3();
+//		buildMultiItemVector3();
 //		getRatingMatrixBySVD(30, 0.5, 0.01);
 		getRatingMatrixBySVDAllItems(30, 0.05, 0.01);
 		saveUPrec();

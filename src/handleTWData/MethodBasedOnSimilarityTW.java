@@ -23,20 +23,20 @@ import java.util.Set;
  *
  */
 public class MethodBasedOnSimilarityTW {
-//	protected final int user_num = 2318;
-//	protected final int item_num = 4358;
-//	protected final int clusterNum = 200;
-//	protected final double averg = 0.7915;
+	protected final int user_num = 2318;
+	protected final int item_num = 4358;
+	protected final int clusterNum = 200;
+	protected final double averg = 0.8076;
 	
 //	protected final int user_num = 943;
 //	protected final int item_num = 1682;
 //	protected final int clusterNum = 100;
 //	protected final double averg = 3;
 	
-	protected final int user_num = 4000;
-	protected final int item_num = 3000;
-	protected final int clusterNum = 300;
-	protected final double averg = 0.9394;
+//	protected final int user_num = 4000;
+//	protected final int item_num = 3000;
+//	protected final int clusterNum = 300;
+//	protected final double averg = 0.9394;
 	
 	protected final int userClusterNum = 100;
 	
@@ -67,6 +67,9 @@ public class MethodBasedOnSimilarityTW {
 //	protected HashMap<Integer, Double> userVar = new HashMap<Integer, Double>();
 	
 //	protected Integer[][]  userToCluster = new Integer[user_num][userClusterNum]; 
+	
+	protected int[] testRec = new int[item_num];
+	protected int[] testRec2 = new int[item_num];
 	
 	public void initRatingMatrix() {
 		for (int i = 0; i < user_num; i++) {
@@ -348,11 +351,14 @@ public class MethodBasedOnSimilarityTW {
 			centers[idx] = key;
 			idx++;
 		}
-		
+//		for (int i  = 0 ; i < clusterNum; i++) {
+//			System.out.println("centers " + i +  "  = " + centers[i]);
+//		}
 		for (int i = 0; i < item_num; i++) {
 			for (int j = 0; j < clusterNum; j++) {
 				if (clusterResult.get(centers[j]).contains(i)) {
 					itemVector[i][j] = 1.0;
+					testRec[i] = j;
 					break;
 				}
 			}
@@ -382,7 +388,7 @@ public class MethodBasedOnSimilarityTW {
 	}
 	
 	
-	public void clustering(int K) {
+	public void clusteringReorderCenters(int K) {
 		System.out.println("116 162 = " + getSim(116, 162) );
 		System.out.println("116 201 = " + getSim(116, 201) );
 		long start = System.currentTimeMillis();
@@ -441,6 +447,113 @@ public class MethodBasedOnSimilarityTW {
 				clusterResult.remove(centerWithMostItems);
 			}
 			System.out.println("itemList = " + itemList);
+			System.out.println("item cluster size   = " + clusterResult.size());
+		}
+		
+
+		long end = System.currentTimeMillis();
+		System.out.println("clustering 运行时间：" + (end - start) + "毫秒");
+		System.out.println("cluster  = " + clusterResult);
+		System.out.println("cluster.size()  = " + clusterResult.size());
+	}
+	
+	
+	
+	public void clustering(int K) {
+		System.out.println("116 162 = " + getSim(116, 162) );
+		System.out.println("116 201 = " + getSim(116, 201) );
+		long start = System.currentTimeMillis();
+		System.out.println("Start to cluster...");
+		ArrayList<Integer> itemList = new ArrayList<Integer>();
+		for (int i = 0; i < item_num; i++) {
+			itemList.add(i);
+		}
+		int k = 2;
+		int x = 0;
+		int y = 0;
+		double sim = 10000000.0;
+		for (int i = 0; i < itemList.size(); i++) {
+			int iTerm = itemList.get(i);
+			for (int j = i+1; j < itemList.size(); j++) {
+				int jTerm = itemList.get(j);
+				double s = getSim(iTerm, jTerm);
+				if (s < sim) {
+					sim = s;
+					x = iTerm;
+					y = jTerm;
+				}
+			}
+		}
+		clusterResult.put(x, new ArrayList<Integer>());
+		clusterResult.put(y, new ArrayList<Integer>());
+		
+		while (k <= K) {
+			System.out.println("k = " + k);
+			for (int i = 0; i < item_num; i++) {
+				sim = -1.0;
+				int center = -1;
+				Set<Integer> keys = clusterResult.keySet();
+				Iterator<Integer> iterator = keys.iterator();
+				while (iterator.hasNext()) {
+					int key = iterator.next();
+					double s = getSim(i, key);
+					if (sim < s ) {
+						sim = s;
+						center = key;
+					}
+				}
+				clusterResult.get(center).add(i);
+			}
+			
+			if (k == K) {
+				break;
+			}
+			
+			itemList.clear();
+			int centerWithMostItems = 0;
+			int cnt = 0;
+			Set<Integer> keys = clusterResult.keySet();
+			Iterator<Integer> iterator = keys.iterator();
+			while (iterator.hasNext()) {
+				int key = iterator.next();
+				ArrayList<Integer> al = clusterResult.get(key);
+				if (al.size() > cnt ) {
+					cnt = al.size();
+					centerWithMostItems = key;
+					itemList = clusterResult.get(centerWithMostItems);
+//					System.out.println("itemList  = " + itemList);
+				}
+//				clusterResult.get(key).clear();
+			}
+		
+			
+			
+			k++;
+			
+			sim = 100000.0;
+			int newCenter = -1;
+			if (itemList.size() == 0) {
+				System.out.println("There are none..........................................................................");
+			}
+			for (int i = 0; i < itemList.size(); i++) {
+				double s1 = getSim(itemList.get(i),centerWithMostItems );
+				if (s1 < sim) {
+					sim = s1;
+					newCenter = itemList.get(i);
+				}
+			}
+			
+			keys = clusterResult.keySet();
+			iterator = keys.iterator();
+			while (iterator.hasNext()) {
+				int key = iterator.next();
+				clusterResult.get(key).clear();
+			}
+			
+			
+			clusterResult.put(newCenter, new ArrayList<Integer>());
+			
+//			System.out.println("itemList = " + itemList);
 			System.out.println("item cluster size   = " + clusterResult.size());
 		}
 		
@@ -900,6 +1013,7 @@ public class MethodBasedOnSimilarityTW {
 	
 	/**
 	 * multi-dimension
+	 * similar to centers of clusters
 	 */
 	public void buildMultiItemVector() {
 		System.out.println("Start to build itemVector...");
@@ -912,8 +1026,15 @@ public class MethodBasedOnSimilarityTW {
 			int key = iterator.next();
 			centers[idx++] = key;
 		}
+		
+//		System.out.println("Multi ------------------------------");
+//		for (int i  = 0 ; i < clusterNum; i++) {
+//			System.out.println("centers " + i +  "  = " + centers[i]);
+//		}
+		
 		for (int i = 0; i < item_num; i++) {
 			double sum = 0.0;
+			double vMax = -2.0;
 			for (int j = 0; j < clusterNum; j++) {
 				double tmp = getSim(i, centers[j]);
 //				if (!Double.isNaN(tmp)) {
@@ -921,15 +1042,53 @@ public class MethodBasedOnSimilarityTW {
 //				}
 				sum += tmp;
 				itemVector[i][j] = tmp;
+				
+				vMax = Math.max(vMax, tmp);
+				if (vMax < tmp) {
+					vMax = tmp;
+					testRec2[i] = j;
+				}
+				
 			}
-			if (sum > 0) {
+			
+			if (vMax > -1.0) {
 				for (int j = 0; j < clusterNum; j++) {
-					itemVector[i][j] /= sum;
-					if (itemVector[i][j] < 0.01) {
+//					itemVector[i][j] /= sum;
+					
+					itemVector[i][j] /= vMax;
+					//0.01 best
+					if (itemVector[i][j] < 0.8) {
 						itemVector[i][j] = 0.0;
 					}
 				}
 			}
+			
+			
+			int cnt = 0;
+			for (int j = 0; j < clusterNum; j++) {
+//				itemVector[i][j] /= sum;
+				
+				//0.01 best
+				if (itemVector[i][j]  >=  0.5) {
+					cnt++;
+				}
+			}
+			System.out.println("cnt = " + cnt);
+			
+			
+			
+			
+//			if (sum > 0) {
+//				for (int j = 0; j < clusterNum; j++) {
+//					itemVector[i][j] /= sum;
+//					
+////					itemVector[i][j] /= vMax;
+//					//0.01 best
+//					if (itemVector[i][j] < 0.1) {
+//						itemVector[i][j] = 0.0;
+//					}
+//				}
+//			}
 			
 		}
 		long end = System.currentTimeMillis();
@@ -937,7 +1096,9 @@ public class MethodBasedOnSimilarityTW {
 	}
 	
 	
-	
+	/**
+	 * only add the items that have been watched by users
+	 */
 	public void buildMultiItemVector2() {
 		System.out.println("Start to build itemVector2...");
 		long start = System.currentTimeMillis();		
@@ -1008,7 +1169,9 @@ public class MethodBasedOnSimilarityTW {
 		System.out.println("buildItemVector 2运行时间：" + (end - start) + "毫秒");
 	}
 	
-	
+	/**
+	 * similar with all items in a cluster, and calculate the mean
+	 */
 	public void buildMultiItemVector3() {
 		System.out.println("Start to build itemVector2...");
 		long start = System.currentTimeMillis();		
@@ -1325,11 +1488,11 @@ public class MethodBasedOnSimilarityTW {
 			 recall.add(reca);
 			 f1.add(f);
 		}
-		String filePath = "/home/xv/DataForRecom/saveData/precision.xls";
+		String filePath = "/home/xv/DataForRecom/saveData/precisionKNN.xls";
 		write(filePath, precison);
-		filePath = "/home/xv/DataForRecom/saveData/recall.xls";
+		filePath = "/home/xv/DataForRecom/saveData/recallKNN.xls";
 		write(filePath, recall);
-		filePath = "/home/xv/DataForRecom/saveData/f1.xls";
+		filePath = "/home/xv/DataForRecom/saveData/f1KNN.xls";
 		write(filePath, f1);
 		long end = System.currentTimeMillis();
 		System.out.println("getPreAndRecallAndF 运行时间：" + (end - start) + "毫秒");
@@ -1362,6 +1525,19 @@ public class MethodBasedOnSimilarityTW {
 		for (int i = 0; i < user_num; i++) {
 			for (int j = 0; j < item_num; j++) {
 				for (int k = 0; k < clusterNum; k++) {
+
+					if (trainData.containsKey(i+1)) {
+						if (trainData.get(i+1).containsKey(j+1)) {
+							userVector[i][k] += 0.7*upmat[i][j]*itemVector[j][k];
+						} else {
+							userVector[i][k] += 0.3*upmat[i][j]*itemVector[j][k];
+						}
+					}
+					
+//					if (upmat[i][j] > 0) {
+//						userVector[i][k] += upmat[i][j]*itemVector[j][k];
+//					}
+					
 					userVector[i][k] += upmat[i][j]*itemVector[j][k];
 				}
 			}

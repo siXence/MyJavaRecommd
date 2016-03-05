@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.mahout.cf.taste.common.TasteException;
@@ -25,6 +26,147 @@ import org.apache.mahout.cf.taste.common.TasteException;
  *
  */
 public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
+	
+	public void getRatingMatrixBySVD(int iterNum, double learnRate, double lamda) {
+		double[] bi = new double[item_num];
+		double[] bu = new double[user_num];
+		Random rd = new Random();
+		for (int i = 0; i < user_num; i++) {
+			for (int j = 0; j < clusterNum; j++) {
+				userVector[i][j] = rd.nextDouble();	
+			}
+		}
+		
+		for (int i = 0; i < iterNum; i++) {
+			Set<Integer> keys = trainData.keySet();
+			Iterator<Integer> iterator = keys.iterator();
+			while (iterator.hasNext()) {
+				int uid = iterator.next();
+				HashMap<Integer, Double> items = trainData.get(uid);
+				Set<Integer> keys_item = items.keySet();
+				Iterator<Integer> iterator_item = keys_item.iterator();
+				while (iterator_item.hasNext()) {
+					int iid = iterator_item.next();
+					double x = items.get(iid);
+					double prod = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						prod += userVector[uid-1][k]*itemVector[iid-1][k];
+					}
+					double y = prod + averg  + bu[uid-1] + bi[iid-1];
+					double eui = x - y;
+					bu[uid-1] += learnRate*(eui - lamda*bu[uid-1]);
+					bi[iid-1] += learnRate*(eui - lamda*bi[iid-1]);
+					for (int j = 0; j < clusterNum; j++) {
+						userVector[uid-1][j] += learnRate*(eui*itemVector[iid-1][j] - lamda*userVector[uid-1][j]);
+					}
+				}
+			}
+			learnRate *= 0.9;
+			System.out.println("The test_RMSE in " + (i+1) + "time :---------------------------------------------------------------------");
+			for (int ii = 0; ii < user_num; ii++) {
+				for (int jj = 0; jj < item_num; jj++) {
+					double p = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						p += (userVector[ii][k]*itemVector[jj][k]);
+					}
+					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
+				}
+			}
+			getRMSE();
+		}
+	}
+	
+	
+	public void getRatingMatrixBySVDAllItems(int iterNum, double learnRate, double lamda) {
+		double[] bi = new double[item_num];
+		double[] bu = new double[user_num];
+		Random rd = new Random();
+		for (int i = 0; i < user_num; i++) {
+			for (int j = 0; j < clusterNum; j++) {
+				userVector[i][j] = rd.nextDouble();	
+			}
+		}
+		
+		for (int i = 0; i < iterNum; i++) {
+			for (int uid = 1; uid <= user_num; uid++) {
+				
+				for (int iid = 1; iid <= item_num; iid++) {
+					double x = upmat[uid-1][iid-1];
+					double prod = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						prod += userVector[uid-1][k]*itemVector[iid-1][k];
+					}
+					double y = prod + averg  + bu[uid-1] + bi[iid-1];
+					double eui = x - y;
+					bu[uid-1] += learnRate*(eui - lamda*bu[uid-1]);
+					bi[iid-1] += learnRate*(eui - lamda*bi[iid-1]);
+					for (int j = 0; j < clusterNum; j++) {
+						userVector[uid-1][j] += learnRate*(eui*itemVector[iid-1][j] - lamda*userVector[uid-1][j]);
+					}
+				}
+			}
+			
+			learnRate *= 0.9;
+			System.out.println("The test_RMSE in " + (i+1) + "time :---------------------------------------------------------------------");
+			for (int ii = 0; ii < user_num; ii++) {
+				for (int jj = 0; jj < item_num; jj++) {
+					double p = 0.0;
+					for (int k = 0; k < clusterNum; k++) {
+						p += (userVector[ii][k]*itemVector[jj][k]);
+					}
+					ratingMatrix[ii][jj] = p + averg + bu[ii] + bi[jj];
+				}
+			}
+			getRMSE();
+			
+		}
+	}
+	
+	
+	
+	
+	public void writeSmoothData(String filePath) {
+		Random rd = new Random();
+		String fileTrain= "/home/xv/DataForRecom/saveData/smoothDataTrain.csv";
+		String fileTest= "/home/xv/DataForRecom/saveData/smoothDataTest.csv";
+		try {
+		    File fTrain = new File(fileTrain);
+		    if (!fTrain.exists()) {
+		    	fTrain.createNewFile();
+		    }
+		    OutputStreamWriter writeTrain = new OutputStreamWriter(new FileOutputStream(fTrain),"UTF-8");
+		    BufferedWriter writerTrain = new BufferedWriter(writeTrain);
+		    
+		    File fTest = new File(fileTest);
+		    if (!fTest.exists()) {
+		    	fTest.createNewFile();
+		    }
+		    OutputStreamWriter writeTest = new OutputStreamWriter(new FileOutputStream(fTest),"UTF-8");
+		    BufferedWriter writerTest = new BufferedWriter(writeTest);
+		    for (int i = 0; i < user_num; i++) {
+		    	for (int j = 1; j < item_num; j++) {
+		    		
+		    		if (upmat[i][j] > 0.0001) {
+		    			String tmp =  String.valueOf(i+1) + "," + String.valueOf(j+1) + ","  +String.valueOf(upmat[i][j] + "\n");
+		    			if (rd.nextDouble() > 0.2) {
+		    				writerTrain.write(tmp);
+		    			} else {
+		    				writerTest.write(tmp);
+		    			}
+//			    		writer.write(tmp);
+		    		}
+		    		
+		    	}
+		    }
+		    
+		    writerTrain.close();
+		    writerTest.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
+	
+	
 	public void ourMethod() throws IOException, TasteException {
 		System.out.println("Starting...");
 		long start = System.currentTimeMillis();
@@ -41,8 +183,11 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 		getTestData(filePath);
 		filePath = "/home/xv/DataForRecom/saveData/simiMatrixTW.txt";
 		
-//		fillMissingProg();
+		fillMissingProg();
 		computeItemAverage();
+		
+//		String testFile =  "/home/xv/DataForRecom/saveData/smoothData.csv";
+//		writeSmoothData(testFile);
 
 		String trainFile = "/home/xv/DataForRecom/saveData/ua.base";
 //		computeCityBlockSimilarity(trainFile);
@@ -54,6 +199,7 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 //		reComputeItemSim();
 		
 		computeSimilaryAllItems() ;
+		
 //		readSimi() ;
 		
 		writeSimiMatrixIntoFile(filePath);
@@ -65,21 +211,25 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 //		saveClusterResult() ;
 //		getClustersCenters();
 		
-		buildMultiItemVector();		
-//		buildMultiItemVector2();		
-//		buildMultiItemVector3();
 //		buildSingleItemVector();
 		
+//		buildMultiItemVector();		
+//		savePCmat() ;
+//		buildMultiItemVector2();		
+//		buildMultiItemVector3();
+		buildSingleItemVector();
+		
 //		buildUserVectorBySum();
+		
 		buildUserVectorBySumAll();
 		getRatingMatrix();
+//		
+//		saveUPrec();
+//		
 		
-		saveUPrec();
 		
-		
-		
-//		getRatingMatrixBySVD(50, 0.5, 0.01);
-//		getRatingMatrixBySVDAllItems(50, 0.5, 0.01);
+//		getRatingMatrixBySVD(30, 0.05, 0.01);
+//		getRatingMatrixBySVDAllItems(30, 0.05, 0.01);
 		
 		sortItemsForUser();
 		
@@ -92,7 +242,22 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 		System.out.println("cluster.size() = " + clusterResult.size());
 		long end = System.currentTimeMillis();
 		System.out.println("Our Method 运行时间：" + (end - start) + "毫秒");
+//		testCnt();
 	}
+	
+	
+	public void testCnt() {
+		int cnt = 0;
+		for (int i = 0; i < item_num; i++) {
+			if (testRec[i] != testRec2[i]) {
+				cnt++;
+			}
+		}
+		System.out.println("the ------------------------------>" + cnt);
+	}
+	
+	
+	
 	
 	public void saveUPrec() {
 //		String filePath = "/home/xv/DataForRecom/saveData/singelUPrec.txt";
@@ -108,6 +273,31 @@ public class DirectComputeUserVector extends MethodBasedOnSimilarityTW{
 		    	String tmp = String.valueOf(ratingMatrix[i][0]);
 		    	for (int j = 1; j < item_num; j++) {
 		    		tmp += "\t" + String.valueOf(ratingMatrix[i][j]);
+		    	}
+		    	tmp += "\n";
+		    	writer.write(tmp);
+		    }
+		    
+		    writer.close();
+		} catch (Exception e) {
+		    e.printStackTrace();
+	    }
+	}
+	
+	public void savePCmat() {
+//		String filePath = "/home/xv/DataForRecom/saveData/singelUPrec.txt";
+		String filePath = "/home/xv/DataForRecom/saveData/pcmat.txt";
+		try {
+		    File f = new File(filePath);
+		    if (!f.exists()) {
+		    	f.createNewFile();
+		    }
+		    OutputStreamWriter write = new OutputStreamWriter(new FileOutputStream(f),"UTF-8");
+		    BufferedWriter writer = new BufferedWriter(write);
+		    for (int i = 0; i < item_num; i++) {
+		    	String tmp = String.valueOf(itemVector[i][0]);
+		    	for (int j = 1; j < clusterNum; j++) {
+		    		tmp += "\t" + String.valueOf(itemVector[i][j]);
 		    	}
 		    	tmp += "\n";
 		    	writer.write(tmp);

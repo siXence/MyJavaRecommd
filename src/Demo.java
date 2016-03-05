@@ -251,34 +251,36 @@ public class Demo {
     
     public static void main(String[] args) throws Exception{
 //        String filepath="itemAll.txt";
-    	String filepath="u.csv";
+//    	String filepath="u.csv";
+    	String filepath= "/home/xv/DataForRecom/saveData/smoothData.csv";
+    	
 //    	String filepath="ratings.txt";
         DataModel model=new FileDataModel(new File(filepath));
         Demo demo=new Demo();
         
         demo.userbased(model, 50);
-//        write("precisionUserML.txt", precisionUser);
-//        write("recallUserML.txt", recallUser);
-//        write("F1UserML.txt", userF1);
+        write("/home/xv/DataForRecom/saveData/precisionUser.txt", precisionUser);
+        write("/home/xv/DataForRecom/saveData/recallUser.txt", recallUser);
+        write("/home/xv/DataForRecom/saveData/F1User.txt", userF1);
         
 //        write("precisionUserTW.txt", precisionUser);
 //        write("recallUserTW.txt", recallUser);
   
-        demo.itembased(model);
-//        write("precisionItemML.txt", precisionItem);
-//        write("recallItemML.txt", recallItem);
-        
-//        write("precisionItemTW.txt", precisionItem);
-//        write("recallItemTW.txt", recallItem);
-        
-//        demo.slope_one(model);
-        demo.SVD(model);
-//        write("precisionSVDML.txt", precisionSVD);
-//        write("recallSVDML.txt", recallSVD);
-        
-//        write("precisionSVDTW.txt", precisionSVD);
-//        write("recallSVDTW.txt", recallSVD);
-        
+//        demo.itembased(model);
+////        write("precisionItemML.txt", precisionItem);
+////        write("recallItemML.txt", recallItem);
+//        
+////        write("precisionItemTW.txt", precisionItem);
+////        write("recallItemTW.txt", recallItem);
+//        
+////        demo.slope_one(model);
+//        demo.SVD(model);
+////        write("precisionSVDML.txt", precisionSVD);
+////        write("recallSVDML.txt", recallSVD);
+//        
+////        write("precisionSVDTW.txt", precisionSVD);
+////        write("recallSVDTW.txt", recallSVD);
+//        
         System.out.println("Done");
     }
 }

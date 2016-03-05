@@ -550,16 +550,16 @@ public class Demo2 {
     
     
     public static void main(String[] args) throws Exception{
-//        String filepath="itemAll.txt";
-//    	String filepath="u.csv";
-//    	String filepath="ratings.txt";
-    	String filepath="u1.base";
-    	readTxtFile("u1.test");
-    	getTrainList(filepath);
-    	getTrainUser(filepath);
-    	
-        DataModel model=new FileDataModel(new File(filepath));
-        Demo2 demo=new Demo2();
+////        String filepath="itemAll.txt";
+////    	String filepath="u.csv";
+////    	String filepath="ratings.txt";
+//    	String filepath="u1.base";
+//    	readTxtFile("u1.test");
+//    	getTrainList(filepath);
+//    	getTrainUser(filepath);
+//    	
+//        DataModel model=new FileDataModel(new File(filepath));
+//        Demo2 demo=new Demo2();
         
 //        MovieLens
 //        demo.userbased(model, 8);
@@ -595,34 +595,36 @@ public class Demo2 {
         
         
 ////      Topway--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-////      String filepath="itemAll.txt";
-////  	String filepath="u.csv";
-////  	String filepath="ratings.txt";
+//      String filepath="itemAll.txt";
+//  	String filepath="u.csv";
+//  	String filepath="ratings.txt";
+    	
 //  	String filepath="dataTWTrain.txt";
-//  	readTxtFile("dataTWTest.txt");
-//  	getTrainUser(filepath);
-//  	
-//      DataModel model=new FileDataModel(new File(filepath));
-//      Demo2 demo=new Demo2();
-//      
-////      demo.userbased(model, 4);
-////      write("precisionUserTW.xls", precisionUser);
-////      write("recallUserTW.xls", recallUser);
-////      write("F1UserTW.xls", userF1);
+    	String filepath="/home/xv/DataForRecom/saveData/smoothDataTrain.csv";
+  	readTxtFile("/home/xv/DataForRecom/saveData/smoothDataTest.csv");
+  	getTrainUser(filepath);
+  	
+      DataModel model=new FileDataModel(new File(filepath));
+      Demo2 demo=new Demo2();
+      
+      demo.userbased(model, 10);
+      write("/home/xv/DataForRecom/saveData/precisionUserTW.xls", precisionUser);
+      write("/home/xv/DataForRecom/saveData/recallUserTW.xls", recallUser);
+      write("/home/xv/DataForRecom/saveData/F1UserTW.xls", userF1);
+//
+//      demo.itembased(model);
+//      write("precisionItemTW.xls", precisionItem);
+//      write("recallItemTW.xls", recallItem);
+//      write("F1ItemTW.xls", itemF1);
 ////
-////      demo.itembased(model);
-////      write("precisionItemTW.xls", precisionItem);
-////      write("recallItemTW.xls", recallItem);
-////      write("F1ItemTW.xls", itemF1);
-//////
-//////////      demo.slope_one(model);
-//////      
+////////      demo.slope_one(model);
+////      
 //      demo.SVD(model);
 //      write("precisionSVDTW.xls", precisionSVD);
 //      write("recallSVDTW.xls", recallSVD);
 //      write("F1SVDTW.xls", svdF1);
-
-        System.out.println("Tu = " + Tu);
+//
+//        System.out.println("Tu = " + Tu);
         System.out.println("Done");
     }
 }
